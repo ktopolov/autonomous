@@ -4,7 +4,7 @@ Autonomous driving algorithm development and simulation with ROS
 # Getting Started
 Install dependencies on WSL using:
 ```bash
-sudo apt update && sudo apt install -y cmake g++ wget unzip python3 git libeigen3-dev
+sudo apt update && sudo apt install -y cmake g++ wget unzip python3 git
 ```
 
 # Cloning the Repo
