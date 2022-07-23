@@ -1,5 +1,13 @@
 {
     "files.associations": {
         "iostream": "c"
-    }
+    },
+    "editor.rulers": [
+        100
+    ],
+    // Editor control and appearance
+    "window.zoomLevel": 1,
+    "editor.mouseWheelZoom": true, // zoo in and out with ctrl + mouse wheel
+    "editor.minimap.enabled": false,
+    "editor.fastScrollSensitivity": 6.0,
 }
