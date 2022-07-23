@@ -23,7 +23,7 @@ to clone into the current folder.
 Now, we setup a Python virtual environment:
 ```bash
 # get virtualenv package
-sudo apt install python3.8-venv
+sudo apt install python3-venv
 
 # Create virtual env
 python3 -m venv ~/venvs/auto_venv
