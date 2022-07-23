@@ -5,6 +5,7 @@ REPO_DIR="${CURRENT_DIR}/${SCRIPT_DIR}"
 echo "Repository located at ${REPO_DIR}"
 
 # === Run Python Pipeline ===
+echo "Python testing..."
 cd ${REPO_DIR}/python
 
 # 1) Lint code with Pylint
@@ -19,6 +20,7 @@ pytest tests
 python scripts/sample_script.py
 
 # === Run C++ Pipeline ===
+echo "C++ testing..."
 cd ${REPO_DIR}/c++
 
 # 1) Build code
@@ -29,6 +31,11 @@ cmake --build ./build
 
 # 3) Run apps
 ./build/helloworld
+
+# === Build and Run Docker Container
+echo "Docker testing..."
+cd ${REPO_DIR}
+docker build --tag mytag --file ./Dockerfile .
 
 # Restore directory to initial dir
 cd ${CURRENT_DIR}
