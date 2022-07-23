@@ -50,10 +50,15 @@ Make will change folders into the **c++/build** folder and then compile.
 Some helpful aliases I set:
 ```bash
 export AUTONOMOUS_PATH='~/repos/autonomous'
-export OPENCV_PATH="~/repos/opencv-4.x"  # this is required for project to build
-alias auto-setup="source ~/venvs/auto_venv/bin/activate"  # activate Pytho virtual environment
-alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"  # Use cmake to configure build directory
-alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"  # build c++ project
 alias go-auto="cd ${AUTONOMOUS_PATH}"
+
+# activate Python virtual environment, set python path
+alias auto-setup="source ~/venvs/auto_venv/bin/activate; export PYTHONPATH=${AUTONOMOUS_PATH}/python"
+
+# Use cmake to configure build directory
+alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"
+
+# build c++ project
+alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"
 ```
 
