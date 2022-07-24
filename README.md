@@ -62,3 +62,20 @@ alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"
 alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"
 ```
 
+# Interactive Plotting
+Assuming you work on WSL2 and want to show plots on your Windows machine:
+*  Download and Install Vcxsrv on Windows from https://sourceforge.net/projects/vcxsrv/
+*  Open WSL2 and add the following lines into your `~/.bashrc` or whatever file runs on setup:
+```bash
+export DISPLAY=$(ip route list default | awk '{print $3}'):0
+export LIBGL_ALWAYS_INDIRECT=1
+```
+
+In windows start menu, search for **XLaunch** and open it. Select "Multiple Windows". Hit next and select "Start no client". Hit next and check **all boxes**, including the **Disable access control**. If you don't do this, it won't work. Hit "Next" >> "Finish".
+
+Now if you open a WSL window (or source your `~/.bashrc` file) and run something like **gedit** you should see a window appear.
+
+Alternatively, you can simply load a VCXSRV configuration file in this repo (**vcxsrv_wsl2**) by:
+*  Double click the **vcxsrv_wsl2** file in Windows machine
+*  Open with **Xlaunch**
+Now, an X-server should be open for you.
