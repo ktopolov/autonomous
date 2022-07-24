@@ -10,4 +10,5 @@
     "editor.mouseWheelZoom": true, // zoo in and out with ctrl + mouse wheel
     "editor.minimap.enabled": false,
     "editor.fastScrollSensitivity": 6.0,
+    "python.formatting.provider": "black",
 }

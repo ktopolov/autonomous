@@ -1,4 +1,6 @@
 black
+ipython
+matplotlib
 numpy
 opencv-contrib-python
 pylint
