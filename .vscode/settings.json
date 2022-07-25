@@ -11,4 +11,5 @@
     "editor.minimap.enabled": false,
     "editor.fastScrollSensitivity": 6.0,
     "python.formatting.provider": "black",
+    "editor.formatOnSave": false
 }
