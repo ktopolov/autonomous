@@ -190,7 +190,7 @@ plt.title('Rectified Right Image')
 left_image_rect_grey = cv2.cvtColor(left_image_rect, cv2.COLOR_BGR2GRAY)
 right_image_rect_grey = cv2.cvtColor(right_image_rect, cv2.COLOR_BGR2GRAY)
 
-stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
+stereo = cv2.StereoSGBM_create(minDisparity=1, numDisparities=10, blockSize=21)
 disparity = stereo.compute(left_image_rect_grey, right_image_rect_grey)
 
 # TODO-KT: Recover depth from disparities and then transform into robot coordinates
@@ -209,6 +209,29 @@ plt.subplot(2, 1, 2)
 plt.imshow(depth, cmap='gray', aspect='auto')
 plt.title('Depth (m)')
 plt.colorbar()
+
+# Take left rectified image grayscale as baseline, and then add more and more
+# red in the closer objects are
+base_image = np.repeat(
+    left_image_rect_grey[:, :, np.newaxis],
+    repeats=3,
+    axis=-1
+)
+
+norm_disparity = disparity.copy()
+norm_depth = np.maximum(norm_disparity, 0)  # negative disparity should not be possible
+norm_depth = (norm_depth - norm_depth.min()) / (norm_depth.max() - norm_depth.min())
+norm_depth = (255 * norm_depth).astype(np.uint8)
+base_image[:, :, 0] += norm_depth
+
+plt.figure(4, clear=True, figsize=(10, 6))
+plt.imshow(base_image, aspect='auto')
+plt.title('Base Image Overlaid with Depth')
+
+plt.figure(5, clear=True)
+bins = np.histogram_bin_edges(disparity.flatten())
+plt.hist(disparity.flatten(), bins=bins)
+plt.title('Disparity Histogram')
 
 plt.show(block=True)
 

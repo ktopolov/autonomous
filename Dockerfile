@@ -13,6 +13,7 @@ RUN apt install -y cmake
 
 RUN apt install -y python3 python3-pip python3-venv
 RUN apt install -y libopencv-dev
+RUN apt install -y clang-tidy
 
 # Copy whole repo to autonomous folder
 COPY . /autonomous
