@@ -79,3 +79,8 @@ Alternatively, you can simply load a VCXSRV configuration file in this repo (**v
 *  Double click the **vcxsrv_wsl2** file in Windows machine
 *  Open with **Xlaunch**
 Now, an X-server should be open for you.
+
+## Working with ROS
+To install ROS, you can either look at the lines in the Dockerfile in this repo which pertain to ROS installation, or visit http://wiki.ros.org/noetic/Installation/Ubuntu and follow the instructions there. We use ROS noetic for this project.
+
+ROS tutorials are located at http://wiki.ros.org/ROS/Tutorials
