@@ -84,3 +84,31 @@ Now, an X-server should be open for you.
 To install ROS, you can either look at the lines in the Dockerfile in this repo which pertain to ROS installation, or visit http://wiki.ros.org/noetic/Installation/Ubuntu and follow the instructions there. We use ROS noetic for this project.
 
 ROS tutorials are located at http://wiki.ros.org/ROS/Tutorials
+
+## Pushing/Pulling Docker Images from Dockerhub
+We like docker images to be stored on Dockerhub such that we can share them across developers and so our CI/CD pipeline can pull from there rather than building the image from scratch. To push an image to DockerHub, we first build the image on our local machine. For example:
+```bash
+cd <path-to-autonomous-repo>
+
+# Build the Dockerfile for development and give it a v1 tag. Tell it to look in the docker/ folder where
+# the .dockerignore file exists
+docker build --file ${AUTONOMOUS_PATH}/docker/Dockerfile-dev --tag autonomous-dev:v1 ${AUTONOMOUS_PATH}/docker
+```
+After building, verify that the image `autonomous-dev` exists with tag `v1` by running:
+```
+docker images
+```
+If it does, your next step is to log into your DockerHub account (free if you do not already have one). To do this:
+```bash
+docker login
+```
+If you are **not** already logged into Docker Desktop, it will prompt you for your DockerHub username and password; otherwise, it should automatically find your credentials. The image that I want to push on my current machine is labeled as: **image : autonomous-dev, tag: v1** and I want to push it to my **autonomous** repository on DockerHub with image name **autonomous** and just use the default "latest" tag. To do this:
+```bash
+# 1) Rename image to sit under proper repository with proper tagging
+# docker tag <local-image-name>:<local-tag> <dockerhub-repo-name>/<desired-dockerhub-image-name>:<desired-dockerhub-tag>
+docker tag autonomous-dev:v1 autonomous/autonomous-dev
+
+# 2) Now when you run docker images, you should see an equivalent image but with the new naming scheme. Now use
+# the following to push it to Docker
+docker push autonomous/autonomous-dev
+```
