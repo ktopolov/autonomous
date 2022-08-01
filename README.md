@@ -84,3 +84,14 @@ Now, an X-server should be open for you.
 To install ROS, you can either look at the lines in the Dockerfile in this repo which pertain to ROS installation, or visit http://wiki.ros.org/noetic/Installation/Ubuntu and follow the instructions there. We use ROS noetic for this project.
 
 ROS tutorials are located at http://wiki.ros.org/ROS/Tutorials
+
+## Pushing/Pulling Docker Images from Dockerhub
+We like docker images to be stored on Dockerhub such that we can share them across developers and so our CI/CD pipeline can pull from there rather than building the image from scratch. There is a shell script in this repo which can be run to do the following:
+*  Build Docker image locally
+*  Push Docker image to DockerHub
+
+To run this script, simply run:
+```bash
+source <path-to-autonomous-repo>/docker/build_deploy_dev_docker.sh
+```
+If you are NOT logged into Docker already, it will prompt you for username and password for DockerHub. After entering, it will proceed to build and deploy the Docker image.
