@@ -1,4 +1,4 @@
-#!/home/ktopolov/venvs/auto_venv/bin/python
+#!/home/ktopolov/venvs/auto_venv/bin/python3
 # -*- coding: utf-8 -*-
 
 # Software License Agreement (BSD License)
