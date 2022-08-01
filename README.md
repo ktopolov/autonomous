@@ -80,12 +80,12 @@ Alternatively, you can simply load a VCXSRV configuration file in this repo (**v
 *  Open with **Xlaunch**
 Now, an X-server should be open for you.
 
-## Working with ROS
+# Working with ROS
 To install ROS, you can either look at the lines in the Dockerfile in this repo which pertain to ROS installation, or visit http://wiki.ros.org/noetic/Installation/Ubuntu and follow the instructions there. We use ROS noetic for this project.
 
 ROS tutorials are located at http://wiki.ros.org/ROS/Tutorials
 
-## Pushing/Pulling Docker Images from Dockerhub
+# Pushing/Pulling Docker Images from Dockerhub
 We like docker images to be stored on Dockerhub such that we can share them across developers and so our CI/CD pipeline can pull from there rather than building the image from scratch. There is a shell script in this repo which can be run to do the following:
 *  Build Docker image locally
 *  Push Docker image to DockerHub
