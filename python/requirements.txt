@@ -1,4 +1,6 @@
 black
+catkin_pkg
+empy
 ipython
 matplotlib
 numpy

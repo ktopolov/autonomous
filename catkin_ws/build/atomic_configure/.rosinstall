@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ktopolov/repos/autonomous/catkin_ws/devel/setup.sh
