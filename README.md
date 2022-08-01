@@ -95,3 +95,14 @@ To run this script, simply run:
 source <path-to-autonomous-repo>/docker/build_deploy_dev_docker.sh
 ```
 If you are NOT logged into Docker already, it will prompt you for username and password for DockerHub. After entering, it will proceed to build and deploy the Docker image.
+
+To pull the latest docker image to work with, use:
+```bash
+docker pull ktopolovec/autonomous:latest
+```
+Alternatively, you can choose to simply build the docker image yourself from this repository by using:
+```
+docker build --file <path-to-autonomous-repo>/docker/Dockerfile-dev --tag "ktopolovec/autonomous" <path-to-autonomous-repo>/docker
+```
+Unclear which of the two options will be faster; one requires large Docker image to transfer over the network; the other requires user's PC to build the image which requires large installs to occur.
+
