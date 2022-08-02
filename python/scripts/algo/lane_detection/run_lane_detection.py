@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Local Imports
+from modules.algo import lane_detection
 
 def read_kitti_road_data(
     data_road_path: pathlib.Path,
@@ -53,8 +54,8 @@ def read_kitti_road_data(
 
 data_road_path = pathlib.Path('/mnt/c/Users/ktopo/Desktop/kitti/data_road')
 data_type = 'training'
-frame_num = 0
-image, calib_df = read_kitti_road_data(
+frame_num = 10
+image, calib = read_kitti_road_data(
     data_road_path=data_road_path,
     data_type=data_type,
     frame_num=frame_num
@@ -73,116 +74,152 @@ for ii, channel in enumerate(channels):
 
 plt.tight_layout()
 
-# %% Threshold
-threshold = 200
-thresholded = image_hsv[:, :, 2] > threshold
+# Gaussian Blue Value Channel
+image_blur = cv2.GaussianBlur(image_hsv[:, :, 2], (5, 5), 0)
 
-plt.figure('Thresholded', clear=True)
-plt.imshow(thresholded, aspect='auto', cmap='gray')
-plt.title(f'Thresholded Value Channel - Threshold: {threshold}')
+plt.figure('Blur', clear=True)
+plt.imshow(image_blur, aspect='auto', cmap='gray')
+plt.title(f'Blurred Value Channel')
 plt.xlabel('Image x')
 plt.ylabel('Image y')
 
-print('Done')
+# %% Canny Edge Detection
+low_threshold = 130
+high_threshold = 200
+edges = cv2.Canny(
+    image_blur,
+    low_threshold,
+    high_threshold,
+    apertureSize=3
+)
 
-# %% Crop ROI
-n_row, n_col = thresholded.shape
-start_row = 200
-n_roi_row = n_row - start_row
-n_roi_col = 600
-start_col = (n_col - n_roi_col) // 2
+# ROI
+def region_of_interest(image):
+    """Define polygon region of interest in image
 
-stop_row = start_row + n_roi_row
-stop_col = start_col + n_roi_col
+    Args:
+        image: (n_row, n_col)
 
-roi = thresholded[start_row:stop_row, start_col:stop_col]
-roi = roi.astype(np.uint8)
+    Returns:
+        mask: (n_row, n_col) boolean mask
+    """
+    polygons = np.array([
+        [(398, 375), (493, 181), (1231, 357)]
+    ])
+    mask = np.zeros_like(image)
+    cv2.fillPoly(mask, polygons, 255)
+    return mask
 
-# %% Erosion to Remove Noisy Points
-# Creating kernel
-erode_shape = (3, 3)
-kernel = np.ones(erode_shape, np.uint8)  # take minimum of values in this kernel window
-roi_eroded = cv2.erode(roi, kernel)
+roi_mask = region_of_interest(edges)
 
-dilate_shape = (5, 5)
-kernel = np.ones(dilate_shape, np.uint8)  # take minimum of values in this kernel window
-roi_dilated = cv2.dilate(roi_eroded, kernel) 
+edges_roi = roi_mask * edges
+
+plt.figure('ROI Image', clear=True)
+plt.imshow(roi_mask[:, :, np.newaxis] * image, aspect='auto')
+plt.title('Image ROI')
+plt.xlabel('Image x')
+plt.ylabel('Image y')
 
 plt.figure('ROI', clear=True)
-plt.subplot(3, 1, 1)
-plt.imshow(roi, aspect='auto', cmap='gray')
-plt.title(f'ROI')
-plt.xlabel('Image x')
-plt.ylabel('Image y')
-
-plt.subplot(3, 1, 2)
-plt.imshow(roi_eroded, aspect='auto', cmap='gray')
-plt.title(f'ROI - Eroded')
-plt.xlabel('Image x')
-plt.ylabel('Image y')
-
-plt.subplot(3, 1, 3)
-plt.imshow(roi_dilated, aspect='auto', cmap='gray')
-plt.title(f'ROI - Dilated')
-plt.xlabel('Image x')
-plt.ylabel('Image y')
-
-# %% Detect Edges and Lines
-fullsize = np.zeros_like(image_hsv[:, :, 0])
-fullsize[start_row:stop_row, start_col:stop_col] = roi_dilated
-edges = cv2.Canny(image_hsv[:, :, 2], 100, 150, apertureSize=3)
-
-edges = edges * fullsize
-
-plt.figure('Edges', clear=True)
+plt.subplot(2, 2, 1)
 plt.imshow(edges, aspect='auto', cmap='gray')
-plt.title(f'Edges')
+plt.title('Edges')
 plt.xlabel('Image x')
 plt.ylabel('Image y')
 
-# This returns an array of r and theta values
-# rho: Distance (pixels) resolution to sweep
-# theta: Angular (deg) resolution to sweep
-# threshold: Number of hits to declare line
-# lines = cv2.HoughLines(edges, rho=1, theta=np.pi/180, threshold=20)
-lines = cv2.HoughLines(edges, rho=1, theta=np.pi/30, threshold=20)
+plt.subplot(2, 2, 2)
+plt.imshow(roi_mask, aspect='auto', cmap='gray')
+plt.title('ROI Mask')
+plt.xlabel('Image x')
+plt.ylabel('Image y')
 
-# The below for loop runs till r and theta values
-# are in the range of the 2d array
-for r_theta in lines:
-    arr = np.array(r_theta[0], dtype=np.float64)
-    r, theta = arr
-    # Stores the value of cos(theta) in a
-    a = np.cos(theta)
- 
-    # Stores the value of sin(theta) in b
-    b = np.sin(theta)
- 
-    # x0 stores the value rcos(theta)
-    x0 = a*r
- 
-    # y0 stores the value rsin(theta)
-    y0 = b*r
- 
-    # x1 stores the rounded off value of (rcos(theta)-1000sin(theta))
-    x1 = int(x0 + 1000*(-b))
- 
-    # y1 stores the rounded off value of (rsin(theta)+1000cos(theta))
-    y1 = int(y0 + 1000*(a))
- 
-    # x2 stores the rounded off value of (rcos(theta)+1000sin(theta))
-    x2 = int(x0 - 1000*(-b))
- 
-    # y2 stores the rounded off value of (rsin(theta)-1000cos(theta))
-    y2 = int(y0 - 1000*(a))
- 
-    # cv2.line draws a line in img from the point(x1,y1) to (x2,y2).
-    # (0,0,255) denotes the colour of the line to be
-    # drawn. In this case, it is red.
-    cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+plt.subplot(2, 2, 3)
+plt.imshow(edges_roi, aspect='auto', cmap='gray')
+plt.title(f'Edges in ROI')
+plt.xlabel('Image x')
+plt.ylabel('Image y')
 
-plt.figure('Detected Lines', clear=True)
+# Threshold only for white pixels
+threshold = 200
+threshold_mask = image_hsv[:, :, 2] > threshold
+edges_roi_thresholded = edges_roi * threshold_mask
+
+plt.subplot(2, 2, 4)
+plt.imshow(edges_roi_thresholded, aspect='auto', cmap='gray')
+plt.title(f'Edges in ROI')
+plt.xlabel('Image x')
+plt.ylabel('Image y')
+
+# %% Detect Lines
+rho_res = 2  # pixels resolution
+theta_res = 2.0  # degrees
+accumulator_threshold = 10  # number of hits along line
+lines = cv2.HoughLinesP(
+    edges_roi_thresholded,
+    rho_res,
+    np.deg2rad(theta_res),
+    threshold=accumulator_threshold,
+    minLineLength=20,
+    maxLineGap=10
+)
+
+i_left_line = None
+i_right_line = None
+
+n_line = lines.shape[0]
+n_row, n_col, _ = image.shape
+for i_line in range(n_line):
+    # Lines ordered by confidence level
+    x1, y1, x2, y2 = lines[i_line, 0, :]
+
+    slope = (y2 - y1) / (x2 - x1)
+    intercept = y2 - slope * x2
+    line_side = lane_detection.check_lane_side(
+        slope=slope,
+        intercept=intercept,
+        n_row=n_row,
+        n_col=n_col
+    )
+
+    if (line_side == 'left') and (i_left_line is None):
+        i_left_line = i_line
+    elif (line_side == 'right') and (i_right_line is None):
+        i_right_line = i_line
+
+    if (i_left_line is not None) and (i_right_line is not None):
+        break
+
+if i_left_line is None:
+    print('Could not find left line')
+if i_right_line is None:
+    print('Could not find right line')
+
+plt.figure('Final', clear=True)
 plt.imshow(image, aspect='auto')
-plt.title('Detected Lines')
+xlim = np.array([0, n_col])
+ylim = np.array([n_row, 0])
+for i_line in [i_left_line, i_right_line]:
+    if i_line is None:
+        continue  # could not be found
 
+    x1, y1, x2, y2 = lines[i_line, 0, :]
+    slope = (y2 - y1) / (x2 - x1)
+    intercept = y2 - slope * x2
+    y_line = slope * xlim + intercept
+    plt.plot(xlim, y_line, 'r--')
+
+plt.xlim(xlim)
+plt.ylim(ylim)
+plt.title('Final')
+
+# Project into real-world (assume road coordinate frame +z is normal to road, x/y in road)
+cam_to_road = calib['Tr_cam_to_road:']
+camera_matrix, rotmat_to_cam, tvec_world_to_cam = cv2.decomposeProjectionMatrix(cam_to_road)[:3]
+tvec_world_to_cam = tvec_world_to_cam[:3] / tvec_world_to_cam[3]  # from homogeneous to cartesian
+
+# FIXME-KT: Decompose this into camera and extrinsic matrices, rotate points via homography into
+# road frame (augment pixels from 2D to 3D, apply 3D rotation homography, assign a depth and recover
+# 3D point using https://medium.com/yodayoda/from-depth-map-to-point-cloud-7473721d3f)
+#
+# Then, report line slope and intercept in real-world (or rho/theta?)
 plt.show()
