@@ -1,3 +1,5 @@
-# Do not commit build files/executables
+# C++ Ignores: Do not commit build files/executables
 /c++/build
 
+# Python Ignores
+__pycache__/

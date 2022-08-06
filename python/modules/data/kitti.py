@@ -10,9 +10,7 @@ import cv2
 
 # %% KITTI ROAD DATASET
 def read_kitti_road_data(
-    data_road_path: pathlib.Path,
-    data_type: str = 'training',
-    frame_num: int = 0
+    data_road_path: pathlib.Path, data_type: str = "training", frame_num: int = 0
 ):
     """Read from the Kitti Road dataset found at http://www.cvlibs.net/datasets/kitti/eval_road.php
 
@@ -29,17 +27,17 @@ def read_kitti_road_data(
         calib: Dictionary containing calibration information for all sensors
     """
     # Load image
-    assert data_type in ['training', 'testing'], 'Unknown data type'
-    image_path = data_road_path / f'{data_type}/image_2/um_{frame_num:06d}.png'
+    assert data_type in ["training", "testing"], "Unknown data type"
+    image_path = data_road_path / f"{data_type}/image_2/um_{frame_num:06d}.png"
     image = cv2.imread(str(image_path))
 
     # Load calibration
-    calib_path = data_road_path / f'{data_type}/calib/um_{frame_num:06d}.txt'
-    calib_df = pd.read_csv(calib_path, delimiter=' ', header=None, index_col=0)
+    calib_path = data_road_path / f"{data_type}/calib/um_{frame_num:06d}.txt"
+    calib_df = pd.read_csv(calib_path, delimiter=" ", header=None, index_col=0)
 
     calib = {
-        index: np.array(calib_df.loc[index]).reshape((3, 4)) \
-            for index in calib_df.index.values.tolist()
+        index: np.array(calib_df.loc[index]).reshape((3, 4))
+        for index in calib_df.index.values.tolist()
     }
 
     return image, calib

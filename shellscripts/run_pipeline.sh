@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 CURRENT_DIR=${PWD}
-SCRIPT_DIR=$(dirname "$SCRIPT")
-REPO_DIR="${CURRENT_DIR}/${SCRIPT_DIR}"
+SHELLSCRIPTS_DIR=$(dirname "$SCRIPT")
+REPO_DIR="${CURRENT_DIR}/${SHELLSCRIPTS_DIR}/.."
 echo "Repository located at ${REPO_DIR}"
 
 # === Run Python Pipeline ===
 echo "Python testing..."
 cd ${REPO_DIR}/python
+
+# 0) Auto-Format Python Code
+black .
 
 # 1) Lint code with Pylint
 pylint --rc-file .pylintrc modules
