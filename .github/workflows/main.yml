@@ -22,9 +22,19 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v2
       
+      # Log into DockerHub using the "secrets" in this repo; see "Settings>Secrete".
+      # These are basically just variables I set with my Docker Username "ID" and password
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      
+      - name: Build and Push
+      - run: source ${GITHUB_WORKSPACE}/docker/build_deploy_dev_docker.sh
       # List repo contents just to be sure
-      - name: List contents 
-        run: ls -la ${GITHUB_WORKSPACE}
+      # - name: List contents 
+      #  run: ls -la ${GITHUB_WORKSPACE}
       
       # - name: Build container image
       #  run: docker build --tag "ktopolovec/autonomous" --file ./docker/Dockerfile .
