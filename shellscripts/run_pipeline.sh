@@ -30,7 +30,7 @@ cmake --build ./c++/build
 
 # === Build and Run Docker Container
 echo "Docker testing..."
-docker build --tag mytag --file ./docker/Dockerfile .
+docker build --tag "ktopolovec/autonomous" --file ./docker/Dockerfile .
 
 # Restore directory to initial dir
 cd ${CURRENT_DIR}

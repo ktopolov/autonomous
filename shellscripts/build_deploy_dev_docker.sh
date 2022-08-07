@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+
+# Get repo path
 CURRENT_DIR=${PWD}
-SCRIPT_DIR=$(dirname "$SCRIPT")
-REPO_DIR="${CURRENT_DIR}/${SCRIPT_DIR}"
+SHELLSCRIPTS_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+REPO_DIR="${SHELLSCRIPTS_DIR}/.."
 echo "Repository located at ${REPO_DIR}"
 
 # Assume this script sits inside autonomous/shellscripts

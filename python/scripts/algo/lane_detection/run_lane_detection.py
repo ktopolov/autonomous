@@ -13,10 +13,12 @@ import argparse
 # Third Party Imports
 import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 
 # Local Imports
 from modules.algo import lane_detection
 from modules.data import kitti
+from modules.common import computer_vision as cvision
 
 
 def parse_cli_args() -> argparse.Namespace:
@@ -59,38 +61,25 @@ if __name__ == "__main__":
     assert calib_path.is_file(), f"Calibration file {calib_path} does not exist"
     calib = kitti.read_calib_to_dict(path=calib_path)
 
-    config_path = pathlib.Path(
-        "/home/ktopolov/repos/autonomous/config/algo/lane_line_detector_config.json"
-    )
+    config_path = pathlib.Path(args.config_path) 
     config = None
     with open(config_path) as json_file:
         config = json.load(json_file)
-    LaneDetector = lane_detection.LaneLineDetector(config=config)
 
-    LaneDetector.run(
-        image=image, road_to_cam_proj_mat=calib["Tr_cam_to_road:"], fig_num=1
+    camera_matrix = calib["P2:"][:3, :3]
+    LaneDetector = lane_detection.LaneLineDetector(
+        config=config,
+        tr_cam_to_road=calib["Tr_cam_to_road:"],
+        camera_matrix=camera_matrix,
     )
 
-    # TODO
-    # 1) Transform all found lines to x/y ROAD COORDINATES (real world)
-    # 2) Instead of checking left/right based on image slope, find one line, and omit any other line
-    #    which is CLOSE to this one. left/right lane lines should be at least 1m appart roughly.
-    # 3) update algorithm to output slope/intercept
+    out = LaneDetector.run(
+        image=image,
+        fig_num=1,
+    )
+    print('=== OUTPUTS ===')
+    for key, value in out.items():
+        print(f'{key}: {value}')
 
-    # Project into real-world (assume road coordinate frame +z is normal to road, x/y in road)
-    # cam_to_road = calib['Tr_cam_to_road:']
-    # camera_matrix, rotmat_to_cam, tvec_world_to_cam = cv2.decomposeProjectionMatrix(cam_to_road)[:3]
-    # tvec_world_to_cam = tvec_world_to_cam[:3] / tvec_world_to_cam[3]  # from homogeneous to cartesian
-
-    # cvision.apply_perspective_transform(
-    #     v: np.ndarray,
-    #     transform: np.ndarray
-    # )
-
-    # FIXME-KT: Decompose this into camera and extrinsic matrices, rotate points via homography into
-    # road frame (augment pixels from 2D to 3D, apply 3D rotation homography, assign a depth and recover
-    # 3D point using https://medium.com/yodayoda/from-depth-map-to-point-cloud-7473721d3f)
-    #
-    # Then, report line slope and intercept in real-world (or rho/theta?)
     if args.show_plots:
         plt.show()

@@ -62,6 +62,3 @@ def test_decompose_projection_matrix():
     np.testing.assert_almost_equal(camera_mat_out, camera_mat)
     np.testing.assert_almost_equal(tvec_world_to_cam_out, tvec_world_to_cam)
     np.testing.assert_almost_equal(rot_world_to_cam_out, rot_world_to_cam)
-
-
-# test_decompose_projection_matrix()
