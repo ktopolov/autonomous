@@ -23,7 +23,8 @@ jobs:
         uses: actions/checkout@v2
       
       # List repo contents just to be sure
-      ls ${GITHUB_WORKSPACE}
+      - name: List contents 
+        run: ls -la ${GITHUB_WORKSPACE}
       
       # - name: Build container image
       #  run: docker build --tag "ktopolovec/autonomous" --file ./docker/Dockerfile .
