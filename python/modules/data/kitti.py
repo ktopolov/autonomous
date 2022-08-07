@@ -1,6 +1,7 @@
 """Functions and code relating to working with KITTI datasets"""
 # Standard Imports
 import pathlib
+import typing
 
 # Third Party Imports
 import numpy as np
@@ -9,6 +10,25 @@ import cv2
 
 
 # %% KITTI ROAD DATASET
+def read_calib_to_dict(
+    path: typing.Union[str, pathlib.Path]
+) -> dict:
+    """Read calibration text file from KITTI dataset into dictionary
+
+    Args:
+        calib_path: Path to calibration .txt. file
+
+    Returns:
+        calib: Dictionary of calibration parameters
+    """
+    calib_df = pd.read_csv(path, delimiter=" ", header=None, index_col=0)
+    calib = {
+        index: np.array(calib_df.loc[index]).reshape((3, 4))
+        for index in calib_df.index.values.tolist()
+    }
+    return calib
+
+
 def read_kitti_road_data(
     data_road_path: pathlib.Path, data_type: str = "training", frame_num: int = 0
 ):

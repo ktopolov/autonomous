@@ -12,22 +12,59 @@ import argparse
 
 # Third Party Imports
 import matplotlib.pyplot as plt
+import cv2
 
 # Local Imports
 from modules.algo import lane_detection
 from modules.data import kitti
 
-if __name__ == "__main__":
+
+def parse_cli_args() -> argparse.Namespace:
+    """Parse command line arguments
+
+    Returns:
+        cli_args: Command line arguments accessible via cli_args.name
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--data-path", type=str, required=True, help="Path to KITTI road data folder"
+        "--image-path",
+        type=str,
+        required=True,
+        help="Path to .png road image"
     )
-    data_road_path = pathlib.Path("/mnt/c/Users/ktopo/Desktop/kitti/data_road")
-    data_type = "training"
-    frame_num = 20
-    image, calib = kitti.read_kitti_road_data(
-        data_road_path=data_road_path, data_type=data_type, frame_num=frame_num
+    parser.add_argument(
+        "--calib-path",
+        type=str,
+        required=True,
+        help="Path to calibration .txt file"
     )
+    parser.add_argument(
+        "--config-path",
+        type=str,
+        required=True,
+        help="Path to configuration .json file for LaneLineDetector",
+    )
+    parser.add_argument(
+        "--show-plots",
+        action='store_true',  # default false
+        default=False,
+        help="Whether to show plots and halt execution",
+    )
+    cli_args = parser.parse_args()
+    return cli_args
+
+
+if __name__ == "__main__":
+    args = parse_cli_args()
+
+    image = cv2.imread(args.image_path)
+    assert image is not None, "Image could not be read; may not exist"
+
+    # Load calibration
+    calib_path = pathlib.Path(args.calib_path)
+    assert calib_path.is_file(), f"Calibration file {calib_path} does not exist"
+    calib = kitti.read_calib_to_dict(path=calib_path)
+
     config_path = pathlib.Path(
         "/home/ktopolov/repos/autonomous/config/algo/lane_line_detector_config.json"
     )
@@ -35,6 +72,7 @@ if __name__ == "__main__":
     with open(config_path) as json_file:
         config = json.load(json_file)
     LaneDetector = lane_detection.LaneLineDetector(config=config)
+
     LaneDetector.run(
         image=image, road_to_cam_proj_mat=calib["Tr_cam_to_road:"], fig_num=1
     )
@@ -60,4 +98,5 @@ if __name__ == "__main__":
     # 3D point using https://medium.com/yodayoda/from-depth-map-to-point-cloud-7473721d3f)
     #
     # Then, report line slope and intercept in real-world (or rho/theta?)
-    plt.show()
+    if args.show_plots:
+        plt.show()
