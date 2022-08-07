@@ -10,9 +10,7 @@ import cv2
 
 
 # %% KITTI ROAD DATASET
-def read_calib_to_dict(
-    path: typing.Union[str, pathlib.Path]
-) -> dict:
+def read_calib_to_dict(path: typing.Union[str, pathlib.Path]) -> dict:
     """Read calibration text file from KITTI dataset into dictionary
 
     Args:

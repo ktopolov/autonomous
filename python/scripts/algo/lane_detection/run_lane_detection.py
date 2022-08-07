@@ -27,16 +27,10 @@ def parse_cli_args() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--image-path",
-        type=str,
-        required=True,
-        help="Path to .png road image"
+        "--image-path", type=str, required=True, help="Path to .png road image"
     )
     parser.add_argument(
-        "--calib-path",
-        type=str,
-        required=True,
-        help="Path to calibration .txt file"
+        "--calib-path", type=str, required=True, help="Path to calibration .txt file"
     )
     parser.add_argument(
         "--config-path",
@@ -46,7 +40,7 @@ def parse_cli_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--show-plots",
-        action='store_true',  # default false
+        action="store_true",  # default false
         default=False,
         help="Whether to show plots and halt execution",
     )
