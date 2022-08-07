@@ -11,5 +11,8 @@
     "editor.minimap.enabled": false,
     "editor.fastScrollSensitivity": 6.0,
     "python.formatting.provider": "black",
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/python"
+    }
 }

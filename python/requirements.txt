@@ -6,6 +6,6 @@ opencv-contrib-python
 pandas
 pylint
 pytest
+pytest-cov
 scipy
 tensorflow
-
