@@ -22,6 +22,10 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v2
 
+      # List contents of repo to make sure checkout is correct
+      - name: List repo 
+        run: ls ${GITHUB_WORKSPACE}
+
       # FIXME-KT: Setup CACHE so docker wont rebuild same layers always
 
       # Login using GitHub repo sectets (set Docker ID, password in GitHub settings/secrets)
@@ -31,14 +35,16 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ${GITHUB_WORKSPACE}/docker/Dockerfile-dev
-          # builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
-          # cache-from: type=local,src=/tmp/.buildx-cache
-          # cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and Push
+        run: source ${GITHUB_WORKSPACE}/shellscripts/build_deploy_dev_docker.sh
+
+      # - name: Build and push
+      #   id: docker_build
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     file: ${GITHUB_WORKSPACE}/docker/Dockerfile-dev
+      #     # builder: ${{ steps.buildx.outputs.name }}
+      #     push: true
+      #     tags: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
+      #     # cache-from: type=local,src=/tmp/.buildx-cache
+      #     # cache-to: type=local,dest=/tmp/.buildx-cache
