@@ -22,6 +22,10 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v2
 
+      # List contents of repo to make sure checkout is correct
+      - name: List repo 
+        run: ls ${GITHUB_WORKSPACE}
+
       # FIXME-KT: Setup CACHE so docker wont rebuild same layers always
 
       # Login using GitHub repo sectets (set Docker ID, password in GitHub settings/secrets)
