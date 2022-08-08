@@ -20,13 +20,6 @@ jobs:
     # container: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
     container: ktopolovec/autonomous:latest
     steps:
-      -
-        name: Check versions
-        run: |
-          python3 --version
-          pylint --version
-          black --version
-        
     # Checkout repo under ${GITHUB_WORKSPACE}
       - 
         name: Checkout the repo 
@@ -34,8 +27,12 @@ jobs:
       - 
         name: Python linting 
         run: |
-          bash
-          source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
+          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/modules
+          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/scripts
+          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/unittests
+      -
+        name: Python unit testing
+        run: pytest --cov-report term-missing --cov=${GITHUB_WORKSPACE}/python/modules /python/unittests
     #  - 
     #    name: Python unit tests 
     #    run: |
