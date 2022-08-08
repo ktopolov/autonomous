@@ -56,7 +56,7 @@ jobs:
           context: ${GITHUB_WORKSPACE}
           file: ${GITHUB_WORKSPACE}/docker/Dockerfile-dev
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_TAG}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_TAG }}
 
       # - name: Build and push
       #   id: docker_build
