@@ -11,9 +11,9 @@ cd REPO_DIR
 # === Run Python Pipeline ===
 echo "Python testing..."
 
-source ./run_python_linting.sh
-source ./run_python_unit_tests.sh
-source ./run_python_tests.sh
+source SHELLSCRIPTS_DIR/run_python_linting.sh
+source SHELLSCRIPTS_DIR/run_python_unit_tests.sh
+source SHELLSCRIPTS_DIR/run_python_tests.sh
 
 # === Run C++ Pipeline ===
 echo "C++ testing..."
