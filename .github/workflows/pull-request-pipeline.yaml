@@ -18,7 +18,7 @@ jobs:
   my-test-job:
     runs-on: ubuntu-latest
     # container: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
-    container: ktopolovec/autonomous:latest
+    # container: ktopolovec/autonomous:latest
     steps:
       -
         name: Check versions
@@ -28,13 +28,13 @@ jobs:
       - 
         name: Checkout the repo 
         uses: actions/checkout@v2
-      -
-        name: Start bash shell
-        run: bash
-
       - 
         name: Python linting 
-        run: source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
+        run: |
+          bash
+          source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
       - 
         name: Python unit tests 
-        run: source ${GITHUB_WORKSPACE}/shellscripts/run_python_unit_tests.sh
+        run: |
+          bash
+          source ${GITHUB_WORKSPACE}/shellscripts/run_python_unit_tests.sh
