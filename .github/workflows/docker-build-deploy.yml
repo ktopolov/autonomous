@@ -1,0 +1,44 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker-Build-Deploy
+
+# 1) CONTROL WHEN THIS WORKFLOW WILL RUN
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# 2) BUILD DOCKER IMAGE AND PUSH TO DOCKER REGISTRY
+jobs:
+  build-and-push-docker:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo under ${GITHUB_WORKSPACE}
+      - 
+        name: Checkout the repo 
+        uses: actions/checkout@v2
+
+      # Login to Docker using GitHub secrets
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # Context directory acts as working directory inside Dockerfile so it can properly access the
+      # repo's files
+      - 
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ env.GITHUB_WORKSPACE }}
+          file: ${{ env.GITHUB_WORKSPACE }}/docker/Dockerfile-dev
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
+
