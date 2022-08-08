@@ -38,7 +38,8 @@ RUN ls /autonomous
 # RUN apt install -y clang-tidy
 
 # # Get python packages
-# RUN pip install -r /autonomous/python/requirements.txt
+RUN ls /autonomous
+RUN pip install -r /autonomous/python/requirements.txt
 
 # # Can also pip install repo but then can't develop inside container
 # ENV PYTHONPATH=/autonomous/python
