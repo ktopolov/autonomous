@@ -42,11 +42,11 @@ jobs:
         run: echo ${DOCKER_TAG}
 
       # Final argument is the "context" directory; basically sets the CWD, so Docker can find proper folders
-      - name: Build Docker
-        run: docker build --file ${GITHUB_WORKSPACE}/docker/Dockerfile-dev --tag ${DOCKER_TAG} ${GITHUB_WORKSPACE}
+      # - name: Build Docker
+      #  run: docker build --file ${GITHUB_WORKSPACE}/docker/Dockerfile-dev --tag ${DOCKER_TAG} ${GITHUB_WORKSPACE}
 
-      - name: Push Docker
-        run: docker push ${DOCKER_TAG}
+      #- name: Push Docker
+      #  run: docker push ${DOCKER_TAG}
 
       # Context directory acts as working directory inside Dockerfile so it can properly access the
       # repo's files
