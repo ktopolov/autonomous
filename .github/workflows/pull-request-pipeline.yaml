@@ -36,8 +36,14 @@ jobs:
       -
         name: Python unit testing
         run: pytest --cov-report term-missing --cov=${GITHUB_WORKSPACE}/python/modules ${GITHUB_WORKSPACE}/python/unittests
-    #  - 
-    #    name: Python unit tests 
-    #    run: |
-    #      bash
-    #      source ${GITHUB_WORKSPACE}/shellscripts/run_python_unit_tests.sh
+      -
+        name: Build C++ Code
+        run: |
+          cmake -S ./c++ -B ./c++/build
+          cmake --build ./c++/build
+      -
+        name: C++ Unit Testing
+        run: echo "This is a placeholder"
+      -
+        name: C++ Application Testing
+        run: ./c++/build/helloworld
