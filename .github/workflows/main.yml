@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_TAG: "${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest"
+  DOCKER_TAG: autonomous:latest
 
 # 2) BUILD DOCKER IMAGE AND PUSH TO DOCKER REGISTRY
 jobs:
@@ -47,6 +47,16 @@ jobs:
 
       - name: Push Docker
         run: docker push ${DOCKER_TAG}
+
+      # Context directory acts as working directory inside Dockerfile so it can properly access the
+      # repo's files
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ${GITHUB_WORKSPACE}
+          file: ${GITHUB_WORKSPACE}/docker/Dockerfile-dev
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_TAG}
 
       # - name: Build and push
       #   id: docker_build
