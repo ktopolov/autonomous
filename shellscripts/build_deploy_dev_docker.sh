@@ -15,10 +15,11 @@ DOCKER_DIR=${REPO_DIR}/docker
 echo "Logging into DockerHub..."
 docker login
 
-# 1) Build container
+# 1) Build container; must give context as ${REPO_DIR} so docker container has CWD as top of repo
+#    and can copy all repo into docker container
 TAG="ktopolovec/autonomous"
 echo "Building Docker image with tag ${TAG}"
-docker build --file ${DOCKER_DIR}/Dockerfile-dev --tag "${TAG}" ${DOCKER_DIR}
+docker build --file ${DOCKER_DIR}/Dockerfile-dev --tag "${TAG}" ${REPO_DIR}
 
 # 2) Push to remote repo with default tag "latest"
 echo "Pushing docker image"
