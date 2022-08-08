@@ -22,19 +22,22 @@ jobs:
     steps:
       -
         name: Check versions
-        run: python3 --version
+        run: |
+          python3 --version
+          pylint --version
+          black --version
         
     # Checkout repo under ${GITHUB_WORKSPACE}
       - 
         name: Checkout the repo 
         uses: actions/checkout@v2
       - 
-        name: Python linting 
-        run: |
-          bash
-          source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
-      - 
-        name: Python unit tests 
-        run: |
-          bash
-          source ${GITHUB_WORKSPACE}/shellscripts/run_python_unit_tests.sh
+    #    name: Python linting 
+    #    run: |
+    #      bash
+    #      source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
+    #  - 
+    #    name: Python unit tests 
+    #    run: |
+    #      bash
+    #      source ${GITHUB_WORKSPACE}/shellscripts/run_python_unit_tests.sh
