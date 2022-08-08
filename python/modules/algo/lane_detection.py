@@ -114,16 +114,12 @@ class LaneLineDetector:
 
             # If this line is on left and left lane not yet found...
             if (line_side == "left") and (left_points is None):
-                left_points = np.stack(
-                    (np.array([x1, y1]), np.array([x2, y2])),
-                    axis=0
-                )
+                left_points = np.stack((np.array([x1, y1]), np.array([x2, y2])), axis=0)
 
             # If this line is on right and right lane not yet found...
             elif (line_side == "right") and (right_points is None):
                 right_points = np.stack(
-                    (np.array([x1, y1]), np.array([x2, y2])),
-                    axis=0
+                    (np.array([x1, y1]), np.array([x2, y2])), axis=0
                 )
 
             # If both left/right lanes are found, stop looking
@@ -134,17 +130,23 @@ class LaneLineDetector:
         # Left line: sample two points on line, rotate into road coordiante frame (centered at camera)
         # where x/y in road and +z out of road. Drop z coordinate and fit road-frame line
         cam_to_road = self.tr_cam_to_road[:3, :3]  # (3, 3) rotation matrix
-        tvec_cam_to_road = self.tr_cam_to_road[:3, 3]  # (3,) translation vector = -cam_to_road * p_road_in_cam_frame
+        tvec_cam_to_road = self.tr_cam_to_road[
+            :3, 3
+        ]  # (3,) translation vector = -cam_to_road * p_road_in_cam_frame
 
         # Compute camera height off ground.
         # See http://www.cvlibs.net/datasets/kitti/setup.php for coordinate frames:
         # Camera frame: +z: forward, +x: right, +y: down (toward ground)
-        p_roadorigin_cam = - np.linalg.solve(cam_to_road, tvec_cam_to_road)  # road coord frame origin in camera frame
+        p_roadorigin_cam = -np.linalg.solve(
+            cam_to_road, tvec_cam_to_road
+        )  # road coord frame origin in camera frame
         camera_height = p_roadorigin_cam[1]  # y-value
 
         # Define bird's eye frame. Note: This is similar to the "Road" coordinate frame, but chosen such
         # that the +z axis points directly downward instead of +y
-        ux_road_cam = cam_to_road[0, :]  # get the road frame basis vectors in the camera frame
+        ux_road_cam = cam_to_road[
+            0, :
+        ]  # get the road frame basis vectors in the camera frame
         uy_road_cam = cam_to_road[1, :]
         uz_road_cam = cam_to_road[2, :]
         cam_to_bev = np.stack((uz_road_cam, ux_road_cam, uy_road_cam), axis=0)
@@ -152,7 +154,9 @@ class LaneLineDetector:
         # Rotate to equivalent bird's eye frame (still centered at camera)
         p_bevs = []  # list for each left/right lane, each have 2 points with xyz coords
         for ii, cam_pix in enumerate([left_points, right_points]):
-            bev_pix = cvision.apply_perspective_transform(v=cam_pix, transform=cam_to_bev)
+            bev_pix = cvision.apply_perspective_transform(
+                v=cam_pix, transform=cam_to_bev
+            )
 
             # Augment pixel to 4D so we can recover point with inverse depth
             depth = camera_height
@@ -162,24 +166,27 @@ class LaneLineDetector:
 
             # Invert perspective transform
             camera_matrix_4d = np.eye(4)
-            camera_matrix_4d[:3, :3]= self.camera_matrix[:3, :3]  # see kitti documentation; this is cam matrix
+            camera_matrix_4d[:3, :3] = self.camera_matrix[
+                :3, :3
+            ]  # see kitti documentation; this is cam matrix
             camera_matrix_inv = np.linalg.inv(camera_matrix_4d)
-            p_bev_homo = np.einsum('ij, ...j -> ...i', camera_matrix_inv, bev_pix_aug_4d)
+            p_bev_homo = np.einsum(
+                "ij, ...j -> ...i", camera_matrix_inv, bev_pix_aug_4d
+            )
             p_bev = cvision.homo_to_cart(p_bev_homo)
             p_bevs.append(p_bev)
 
         # Forget about +z coord which is height off ground; care only about angle of x/y coords
         p_bev_left, p_bev_right = p_bevs
-        v_left_lane = p_bev_left[1, :] - p_bev_left[0, :]  # left lane vector from point (x1, y1, z1) to (x2, y2, z2)
+        v_left_lane = (
+            p_bev_left[1, :] - p_bev_left[0, :]
+        )  # left lane vector from point (x1, y1, z1) to (x2, y2, z2)
         v_right_lane = p_bev_right[1, :] - p_bev_right[0, :]
 
         left_lane_angle = np.arctan2(v_left_lane[1], v_left_lane[0])
         right_lane_angle = np.arctan2(v_right_lane[1], v_right_lane[0])
 
-        out = {
-            'left_lane_angle': left_lane_angle,
-            'right_lane_angle': right_lane_angle
-        }
+        out = {"left_lane_angle": left_lane_angle, "right_lane_angle": right_lane_angle}
 
         if fig_num is not None:
             # Plot lines onto original image
@@ -228,10 +235,10 @@ class LaneLineDetector:
 
             # Assuming last plot was final image, plot lines on top
             if left_points is not None:
-                plt.plot(left_points[:, 0], left_points[:, 1], 'r')
+                plt.plot(left_points[:, 0], left_points[:, 1], "r")
 
             if right_points is not None:
-                plt.plot(right_points[:, 0], right_points[:, 1], 'r')
+                plt.plot(right_points[:, 0], right_points[:, 1], "r")
 
             plt.xlim([0, n_col - 1])
             plt.ylim([n_row - 1, 0])
@@ -239,10 +246,10 @@ class LaneLineDetector:
             # Plot real-world left/right lane line points
             plt.subplot(3, 3, 9)
             labels = [
-                f'left - {left_lane_angle:.2f} deg',
-                f'right - {right_lane_angle:.2f} deg'
+                f"left - {left_lane_angle:.2f} deg",
+                f"right - {right_lane_angle:.2f} deg",
             ]
-            styles = ['r-x', 'b-x']
+            styles = ["r-x", "b-x"]
             for ii, p_bev in enumerate(p_bevs):  # go through right and left side
                 plt.plot(p_bev[:, 0], p_bev[:, 1], styles[ii], label=labels[ii])
 
@@ -253,6 +260,7 @@ class LaneLineDetector:
             plt.tight_layout()
 
         return out
+
 
 # %% FUNCTIONS
 def check_lane_side(slope: float, intercept: float, n_row: int, n_col: int):

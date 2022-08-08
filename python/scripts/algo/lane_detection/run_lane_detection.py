@@ -61,7 +61,7 @@ if __name__ == "__main__":
     assert calib_path.is_file(), f"Calibration file {calib_path} does not exist"
     calib = kitti.read_calib_to_dict(path=calib_path)
 
-    config_path = pathlib.Path(args.config_path) 
+    config_path = pathlib.Path(args.config_path)
     config = None
     with open(config_path) as json_file:
         config = json.load(json_file)
@@ -77,9 +77,9 @@ if __name__ == "__main__":
         image=image,
         fig_num=1,
     )
-    print('=== OUTPUTS ===')
+    print("=== OUTPUTS ===")
     for key, value in out.items():
-        print(f'{key}: {value}')
+        print(f"{key}: {value}")
 
     if args.show_plots:
         plt.show()
