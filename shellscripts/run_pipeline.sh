@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Get repo path
 CURRENT_DIR=${PWD}
