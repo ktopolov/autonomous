@@ -27,9 +27,9 @@ jobs:
       - 
         name: Python linting 
         run: |
-          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/modules
-          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/scripts
-          pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/unittests
+          pylint --fail-under 8.0 --rc-file ${GITHUB_WORKSPACE}/python/.pylintrc ${GITHUB_WORKSPACE}/python/modules
+          pylint --fail-under 8.0 --rc-file ${GITHUB_WORKSPACE}/python/.pylintrc ${GITHUB_WORKSPACE}/python/scripts
+          pylint --fail-under 8.0 --rc-file ${GITHUB_WORKSPACE}/python/.pylintrc ${GITHUB_WORKSPACE}/python/unittests
       -
         name: Python unit testing
         run: pytest --cov-report term-missing --cov=${GITHUB_WORKSPACE}/python/modules ${GITHUB_WORKSPACE}/python/unittests
