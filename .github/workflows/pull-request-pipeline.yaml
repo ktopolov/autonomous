@@ -32,7 +32,7 @@ jobs:
           pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${GITHUB_WORKSPACE}/python/unittests
       -
         name: Python unit testing
-        run: pytest --cov-report term-missing --cov=${GITHUB_WORKSPACE}/python/modules /python/unittests
+        run: pytest --cov-report term-missing --cov=${GITHUB_WORKSPACE}/python/modules ${GITHUB_WORKSPACE}/python/unittests
     #  - 
     #    name: Python unit tests 
     #    run: |
