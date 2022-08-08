@@ -53,29 +53,3 @@ def apply_perspective_transform(v: np.ndarray, transform: np.ndarray) -> np.ndar
     out = np.einsum("...ij, ...j -> ...i", transform, aug)
     out = homo_to_cart(out)
     return out
-
-
-def decompose_projection_matrix(
-    world_to_cam_proj_matrix: np.ndarray,
-) -> typing.Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Decompose projection matrix
-
-    Args:
-        world_to_cam_proj_matrix: (3, 4) projection matrix = K * [R | t]
-
-    Returns:
-        camera_matrix: (3, 3) Intrinsic camera projection matrix
-        rot_world_to_cam: (3, 3) Rotation matrix from world frame to camera frame
-        tvec_world_to_cam: (3,) Translation vector from world to camera
-    """
-    warnings.warn(
-        "computer_vision.py: decompose_projection_matrix(): This function may not be correct"
-    )
-    (
-        camera_matrix,
-        rot_world_to_cam,
-        tvec_world_to_cam_homo,
-    ) = cv2.decomposeProjectionMatrix(world_to_cam_proj_matrix)[:3]
-    tvec_world_to_cam_homo = tvec_world_to_cam_homo.flatten()  # from (4, 1) to (4,)
-    tvec_world_to_cam = homo_to_cart(tvec_world_to_cam_homo)
-    return camera_matrix, rot_world_to_cam, tvec_world_to_cam

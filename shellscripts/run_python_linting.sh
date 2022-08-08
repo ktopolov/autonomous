@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Get repo path
 CURRENT_DIR=${PWD}
@@ -10,6 +10,6 @@ echo "Repository located at ${REPO_DIR}"
 black ${REPO_DIR}/python
 
 # 1) Lint code with Pylint
-pylint --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/modules
-pylint --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/scripts
-pylint --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/tests
+pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/modules
+pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/scripts
+pylint --fail-under 8.0 --rc-file ${REPO_DIR}/python/.pylintrc ${REPO_DIR}/python/unittests
