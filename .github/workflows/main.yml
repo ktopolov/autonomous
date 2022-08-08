@@ -41,8 +41,9 @@ jobs:
       - name: Echo docker tag
         run: echo ${DOCKER_TAG}
 
+      # Final argument is the "context" directory; basically sets the CWD, so Docker can find proper folders
       - name: Build Docker
-        run: docker build --file ${GITHUB_WORKSPACE}/docker/Dockerfile-dev --tag ${DOCKER_TAG} ${GITHUB_WORKSPACE}/docker
+        run: docker build --file ${GITHUB_WORKSPACE}/docker/Dockerfile-dev --tag ${DOCKER_TAG} ${GITHUB_WORKSPACE}
 
       - name: Push Docker
         run: docker push ${DOCKER_TAG}
