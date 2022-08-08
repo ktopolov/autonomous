@@ -31,11 +31,11 @@ jobs:
       - 
         name: Checkout the repo 
         uses: actions/checkout@v2
-    #  - 
-    #    name: Python linting 
-    #    run: |
-    #      bash
-    #      source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
+      - 
+        name: Python linting 
+        run: |
+          bash
+          source ${GITHUB_WORKSPACE}/shellscripts/run_python_linting.sh
     #  - 
     #    name: Python unit tests 
     #    run: |
