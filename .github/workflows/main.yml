@@ -13,6 +13,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  DOCKER_TAG: "${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest"
+
 # 2) BUILD DOCKER IMAGE AND PUSH TO DOCKER REGISTRY
 jobs:
   build-and-push-docker:
@@ -35,8 +38,14 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and Push
-        run: source ${GITHUB_WORKSPACE}/shellscripts/build_deploy_dev_docker.sh
+      - name: Echo docker tag
+        run: echo ${DOCKER_TAG}
+
+      - name: Build Docker
+        run: docker build --file ${GITHUB_WORKSPACE}/docker/Dockerfile-dev --tag ${DOCKER_TAG} ${GITHUB_WORKSPACE}/docker
+
+      - name: Push Docker
+        run: docker push ${DOCKER_TAG}
 
       # - name: Build and push
       #   id: docker_build
