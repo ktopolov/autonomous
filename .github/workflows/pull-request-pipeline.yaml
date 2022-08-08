@@ -28,6 +28,9 @@ jobs:
       - 
         name: Checkout the repo 
         uses: actions/checkout@v2
+      -
+        name: Start bash shell
+        run: bash
 
       - 
         name: Python linting 
