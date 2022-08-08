@@ -18,7 +18,7 @@ jobs:
   my-test-job:
     runs-on: ubuntu-latest
     # container: ${{ secrets.DOCKER_HUB_USERNAME }}/autonomous:latest
-    # container: ktopolovec/autonomous:latest
+    container: ktopolovec/autonomous:latest
     steps:
       -
         name: Check versions
