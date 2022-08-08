@@ -1,6 +1,7 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Docker-Build-Deploy
+# name: Docker-Build-Deploy
+name: CI
 
 # 1) CONTROL WHEN THIS WORKFLOW WILL RUN
 on:
