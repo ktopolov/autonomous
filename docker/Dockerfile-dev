@@ -31,14 +31,14 @@ RUN ls /autonomous
 # # Avoid cmake install asking about geographic area
 # ARG DEBIAN_FRONTEND=noninteractive
 # RUN apt install -y cmake
-# RUN apt install -y python3
-# RUN apt install -y python3-pip
+RUN apt install -y python3
+RUN apt install -y python3-pip
 # RUN apt install -y python3-venv
 # RUN apt install -y libopencv-dev
 # RUN apt install -y clang-tidy
 
 # # Get python packages
-RUN ls /autonomous
+RUN echo $(ls /autonomous)
 RUN pip install -r /autonomous/python/requirements.txt
 
 # # Can also pip install repo but then can't develop inside container
