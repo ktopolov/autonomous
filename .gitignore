@@ -3,3 +3,6 @@
 
 # Python Ignores
 __pycache__/
+
+.vscode/
+.coverage

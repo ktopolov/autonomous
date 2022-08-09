@@ -5,23 +5,12 @@ cmake_minimum_required(VERSION 3.16.3)
 project(autonomous)
 
 # Ensure dependencies exist
-find_package( OpenCV REQUIRED )
+find_package(OpenCV REQUIRED)
 
-# Add subfolder(s) to build folder
-# add_subdirectory(src/apps)
-
-# Note that $PROJECT_SOURCE_DIR refers to the ./c++ folder
-# Includes folders
+# Include external directories
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-include_directories(${PROJECT_SOURCE_DIR}/external/eigen-3.4.0)
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(external/eigen-3.4.0)
 
-# Link Headers to their Implementations
-add_library(helper ${PROJECT_SOURCE_DIR}/include/helper.h ${PROJECT_SOURCE_DIR}/src/modules/helper.cpp)
-
-# Applications
-add_executable(helloworld ${PROJECT_SOURCE_DIR}/src/apps/helloworld.cpp)
-
-# Link Applications to their Required Libraries
-target_link_libraries(helloworld helper ${OpenCV_LIBS})
-
+# Add all internal subdirectories for cmake to go through
+add_subdirectory(common)
+add_subdirectory(algo)
