@@ -52,7 +52,22 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "codecvt": "cpp",
+        "unordered_set": "cpp",
+        "hash_map": "cpp",
+        "cstdarg": "cpp",
+        "strstream": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "future": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp",
+        "valarray": "cpp",
+        "dense": "cpp"
     },
     "editor.rulers": [
         100
@@ -66,5 +81,6 @@
     "editor.formatOnSave": false,
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}/python"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/c++"
 }

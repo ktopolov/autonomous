@@ -1,5 +1,6 @@
 # Specify CMAKE version 
 cmake_minimum_required(VERSION 3.16.3)
+set(CMAKE_CXX_STANDARD 17)
 
 # Give the project a name. CMake will automativally store this name as the variable PROJECT_NAME
 project(autonomous)

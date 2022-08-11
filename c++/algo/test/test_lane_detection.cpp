@@ -1,6 +1,7 @@
 // Standard Imports
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 // Third-Party Imports
 #include "opencv2/opencv.hpp"
@@ -8,42 +9,27 @@
 
 // Local Imports
 // #include <common/include/helper.h>
-#include "common/helper.h"
+#include "common/kitti.h"
+#include<iostream>
 
 int main()
 {
-    std::string inputImagePath = "../../data/kitti_data_road/testing/image_2/um_000000.png";
-    std::string inputCalibPath = "../../data/kitti_data_road/testing/calib/um_000000.txt";
+    if (__cplusplus == 201703L) std::cout << "C++17\n";
+    else if (__cplusplus == 201402L) std::cout << "C++14\n";
+    else if (__cplusplus == 201103L) std::cout << "C++11\n";
+    else if (__cplusplus == 199711L) std::cout << "C++98\n";
+    else std::cout << "pre-standard C++\n";
+
+    std::filesystem::path repoPath = std::filesystem::path(std::getenv("AUTONOMOUS_PATH"));
+    std::filesystem::path inputImagePath = repoPath / "data/kitti_data_road/testing/image_2/um_000000.png";
+    std::filesystem::path inputCalibPath = repoPath / "data/kitti_data_road/testing/calib/um_000000.txt";
 
     // Sample code to ensure Eigen works
     cv::Mat img = cv::imread(inputImagePath);
     std::cout << "Image size: " << img.size() << std::endl;
 
     // Parse calibration file:
-    std::map<std::string, Eigen::MatrixXi> mapOfWords;
-    std::ifstream calibFile(inputCalibPath);
-    std::string str;
     std::cout << "Reading file..." << std::endl;
-    int ii = 0;
-    while (std::getline(calibFile, str))
-    {
-        std::cout << str << std::endl;
-
-        Eigen::MatrixXi matrix(3, 4);
-        matrix.setZero(3, 4);
-
-        std::string key = "someKey" + std::to_string(ii);
-        mapOfWords.insert(std::make_pair(key, matrix));
-        ii++;
-    }
-
-    for (auto const& x : mapOfWords)
-    {
-        std::cout << x.first << ':' << x.second << std::endl;
-    }
-
-    // std::cout << "Result from Eigen: " << m << std::endl;
-
-    // Sample code to ensure internal library works
-    helper::printhello();
+    const kitti::KittiCalibInfo calibInfo = kitti::readCalibInfo(inputCalibPath);
+    std::cout << "Here is P0: \n" << calibInfo.P0 << std::endl;
 }
