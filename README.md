@@ -63,8 +63,9 @@ Other helpful aliases I set:
 ```bash
 alias go-auto="cd ${AUTONOMOUS_PATH}"
 
-# Use cmake to configure build directory
+# Use cmake to configure build directory (optional with debug flags for GDB)
 alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"
+alias auto-cfg-debug="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build -DCMAKE_BUILD_TYPE=Debug"  # Use cmake configure build directory
 
 # build c++ project
 alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"
