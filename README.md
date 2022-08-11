@@ -47,19 +47,34 @@ make -C <path-to-repo>/c++/build
 Make will change folders into the **c++/build** folder and then compile.
 
 # My Aliases
-Some helpful aliases I set:
+The first alias I have sets up my development environment by setting necessary environment variables, etc.:
 ```bash
-export AUTONOMOUS_PATH='~/repos/autonomous'
+alias auto-setup="source /home/ktopolov/venvs/auto_venv/bin/activate; \
+    export PYTHONPATH=/home/ktopolov/repos/autonomous/python; \
+    export AUTONOMOUS_PATH=/home/ktopolov/repos/autonomous; \
+    source /opt/ros/noetic/setup.bash"
+```
+*  First line activates Python virtual environment
+*  Second line sets Python path so we can use relative imports for our repo's code
+*  Third line sets path to the repo; this helps with unit tests which grab data from the **data** folder in the repo
+*  Last line sets up ROS environment
+
+Other helpful aliases I set:
+```bash
 alias go-auto="cd ${AUTONOMOUS_PATH}"
 
-# activate Python virtual environment, set python path
-alias auto-setup="source ~/venvs/auto_venv/bin/activate; export PYTHONPATH=${AUTONOMOUS_PATH}/python"
-
-# Use cmake to configure build directory
+# Use cmake to configure build directory (optional with debug flags for GDB)
 alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"
+alias auto-cfg-debug="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build -DCMAKE_BUILD_TYPE=Debug"  # Use cmake configure build directory
 
 # build c++ project
 alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"
+
+# Build dockerfile locally
+alias auto-bld-docker="docker build --file ${AUTONOMOUS_PATH}/docker/Dockerfile-dev --tag ktopolovec/autonomous:latest ${AUTONOMOUS_PATH}"
+
+# Run the build docker container interactively
+alias auto-run-interactive-docker="docker run -it --entrypoint bash ktopolovec/autonomous:latest"
 ```
 
 # Interactive Plotting
