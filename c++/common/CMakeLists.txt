@@ -5,7 +5,7 @@
 # 4) Add include directory to library
 file(GLOB_RECURSE SRC_FILES src/*.cpp)  # find all .cpp files
 file(GLOB_RECURSE HDR_FILES include/*.h)  # find all .h files
-add_library(common STATIC ${SRC_FILES} ${HDR_FILES})  #${SRC_FILES} ${HDR_FILES})
+add_library(common STATIC ${SRC_FILES} ${HDR_FILES})
 target_include_directories(common PUBLIC include)
 
 # Executable Tests

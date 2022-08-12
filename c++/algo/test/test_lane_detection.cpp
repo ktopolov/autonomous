@@ -2,15 +2,17 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <assert.h>
 
 // Third-Party Imports
 #include "opencv2/opencv.hpp"
 #include <Eigen/Dense>
+#include "Eigen/Core"
 
 // Local Imports
 // #include <common/include/helper.h>
+#include "algo/LaneDetector.h"
 #include "common/kitti.h"
-#include<iostream>
 
 int main()
 {
@@ -24,12 +26,21 @@ int main()
     std::filesystem::path inputImagePath = repoPath / "data/kitti_data_road/testing/image_2/um_000000.png";
     std::filesystem::path inputCalibPath = repoPath / "data/kitti_data_road/testing/calib/um_000000.txt";
 
+    assert(std::filesystem::exists(inputImagePath));
+    assert(std::filesystem::exists(inputCalibPath));
+
     // Sample code to ensure Eigen works
     cv::Mat img = cv::imread(inputImagePath);
-    std::cout << "Image size: " << img.size() << std::endl;
 
     // Parse calibration file:
-    std::cout << "Reading file..." << std::endl;
     const kitti::KittiCalibInfo calibInfo = kitti::readCalibInfo(inputCalibPath);
-    std::cout << "Here is P0: \n" << calibInfo.P0 << std::endl;
+    Eigen::MatrixXf cameraMatrix = calibInfo.projMat2.block<3, 3>(0, 0);
+    std::cout << "camera matrix: " << cameraMatrix << std::endl;
+
+    // Instantiate algo
+    algo::LaneDetector LaneDetectorAlgo = algo::LaneDetector(
+        cameraMatrix,
+        calibInfo.cameraToRoadTransform
+    );
+    // LaneDetectorAlgo.printHello();
 }
