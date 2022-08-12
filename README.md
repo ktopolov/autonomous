@@ -5,7 +5,7 @@ Autonomous driving algorithm development and simulation with ROS
 Install dependencies on WSL using:
 ```bash
 sudo apt update
-sudo apt install -y cmake g++ wget unzip python3 python3-pip git libopencv-dev clang-tidy clang
+sudo apt install -y cmake g++ wget unzip python3 python3-pip git libopencv-dev clang-tidy
 ```
 
 # Cloning the Repo
