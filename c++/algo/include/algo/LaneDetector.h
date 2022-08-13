@@ -29,33 +29,20 @@ namespace algo
             LaneDetector(const Eigen::MatrixXf cameraMatrix,
                          const Eigen::MatrixXf cameraToRoadTransform)
             {
-                std::cout << "Hello World!";
+                this->cameraMatrix = cameraMatrix;
+                this->cameraToRoadTransform = cameraToRoadTransform;
             }
 
             /*! Run algorithm on an incoming image
                 \param image (nRow, nCol, 3) RGB image.
                 \return output Output lane angles.  
             */
-            const LaneDetectorOutput run(const cv::Mat image) const
-            {
-                LaneDetectorOutput output;
-                output.leftLaneAngle = 30.0;
-                output.rightLaneAngle = 20.0;
-                return output;
-            }
-            
-
-        // Members
-        int a;
-        void printHello(){
-            this->printHelloPrivate();
-        }
+            const LaneDetectorOutput run(cv::Mat image) const;
 
         // Member functions
         private:
-        int b;
-        void printHelloPrivate();
-
+            Eigen::MatrixXf cameraMatrix;  // (3, 3) camera projection matrix w/ focal lengths, principal point, etc.
+            Eigen::MatrixXf cameraToRoadTransform;  // [R | t] (3, 4) extrinsic transformation from camera to road coords
     };
 };
 #endif // ALGO_INCLUDE_ALGO_LANEDETECTOR_H

@@ -2,7 +2,8 @@
 FROM ubuntu:20.04
 RUN apt update
 
-# Copy whole repo to autonomous folder
+# Copy whole repo to autonomous folder; the "." refers to the "context" argument of docker build.
+# (the last argument). Should call "docker build ... dockerfile-dev <path-to-autonomous-repo>""
 COPY . /autonomous
 
 # Install and use bash terminal

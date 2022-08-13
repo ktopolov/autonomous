@@ -42,5 +42,6 @@ int main()
         cameraMatrix,
         calibInfo.cameraToRoadTransform
     );
+    const algo::LaneDetectorOutput output = LaneDetectorAlgo.run(img);
     // LaneDetectorAlgo.printHello();
 }
