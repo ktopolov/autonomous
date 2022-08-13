@@ -6,6 +6,14 @@
 // Local Includes
 #include "algo/LaneDetector.h"
 
+algo::LaneDetector::LaneDetector(
+    const Eigen::MatrixXf cameraMatrix,
+    const Eigen::MatrixXf cameraToRoadTransform)
+{
+    this->cameraMatrix = cameraMatrix;
+    this->cameraToRoadTransform = cameraToRoadTransform;
+}
+
 const algo::LaneDetectorOutput algo::LaneDetector::run(cv::Mat image) const
 {
     algo::LaneDetectorOutput output;
@@ -28,17 +36,17 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(cv::Mat image) const
         3);  // apertureSize
 
     // Create polygon for region of interest
-    cv::Mat roi;
+    cv::Mat roiMask;
     std::vector<cv::Point> polygonVertices;
     polygonVertices.push_back(cv::Point(398, 375));
     polygonVertices.push_back(cv::Point(493, 181));
     polygonVertices.push_back(cv::Point(1231, 357));
     std::vector<std::vector<cv::Point>> fillContAll;
     fillContAll.push_back(polygonVertices);
-    cv::fillPoly(roi, fillContAll, cv::Scalar(255));
+    cv::fillPoly(roiMask, fillContAll, cv::Scalar(255));
 
-    // Intersect edges with white threshold mask
-    singleChannel = singleChannel * roi;
+    // Apply ROI mask
+    singleChannel.copyTo(singleChannel, roiMask);
 
     // # Detect lines in mask
     std::vector<cv::Vec4i> outputLines;
@@ -51,6 +59,9 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(cv::Mat image) const
         20.0,  // minimum length of line in pixels
         10.0);  // largest allowable pixel gap between consecutive points on line
 
+    std::cout << "Lines found: " << std::endl;
+    for(auto line : outputLines) 
+        std::cout << "\t Line: " << line << std::endl;
     // # Store points belonging to each line as (n_point, xy) = (2, 2) matrix:
     // # left_points[0, :] = (x1, y1)
     // # left_points[1, :] = (x2, y2)

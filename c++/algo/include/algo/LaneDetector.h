@@ -26,12 +26,9 @@ namespace algo
                 \param cameraToRoadTransform (3, 4) Transformation matrix in form [R | t] from
                     camera to road coordinate frame
             */  
-            LaneDetector(const Eigen::MatrixXf cameraMatrix,
-                         const Eigen::MatrixXf cameraToRoadTransform)
-            {
-                this->cameraMatrix = cameraMatrix;
-                this->cameraToRoadTransform = cameraToRoadTransform;
-            }
+            LaneDetector(
+                const Eigen::MatrixXf cameraMatrix,
+                const Eigen::MatrixXf cameraToRoadTransform);
 
             /*! Run algorithm on an incoming image
                 \param image (nRow, nCol, 3) RGB image.
