@@ -2,6 +2,11 @@
 Autonomous driving algorithm development and simulation with ROS
 
 # Getting Started
+There are two options for development:
+* Develop on local machine with Ubuntu 20; must install all dependencies
+  *  WSL is an option
+* Develop using Docker container (see README file in **docker/** folder)
+
 Install dependencies on WSL using:
 ```bash
 sudo apt update
@@ -38,28 +43,11 @@ pip install -r <path-to-repo>/python/requirements.txt
 # Building and Compiling C++ Code
 If this is your first time in the repom or any files have been moved/added, navigate to the top level of the repo and run:
 ```bash
-cmake -S <path-to-repo>/c++ -B <path-to-repo>/c++/build
-```
-CMake will see the CMakeLists.cpp in the **c++** folder and then generate make files for your project and properly structure your **c++/build** folder. Then, to compile, run:
-```bash
-make -C <path-to-repo>/c++/build
-```
-Make will change folders into the **c++/build** folder and then compile.
+# Build without debug flags
+source shellscripts/cpp_build.sh
 
-# My Aliases
-Some helpful aliases I set:
-```bash
-export AUTONOMOUS_PATH='~/repos/autonomous'
-alias go-auto="cd ${AUTONOMOUS_PATH}"
-
-# activate Python virtual environment, set python path
-alias auto-setup="source ~/venvs/auto_venv/bin/activate; export PYTHONPATH=${AUTONOMOUS_PATH}/python"
-
-# Use cmake to configure build directory
-alias auto-cfg="cmake -S ${AUTONOMOUS_PATH}/c++ -B ${AUTONOMOUS_PATH}/c++/build"
-
-# build c++ project
-alias auto-bld="cmake --build ${AUTONOMOUS_PATH}/c++/build"
+# Build with GDB debug flags
+source shellscripts/cpp_build -d
 ```
 
 # Interactive Plotting
@@ -84,25 +72,3 @@ Now, an X-server should be open for you.
 To install ROS, you can either look at the lines in the Dockerfile in this repo which pertain to ROS installation, or visit http://wiki.ros.org/noetic/Installation/Ubuntu and follow the instructions there. We use ROS noetic for this project.
 
 ROS tutorials are located at http://wiki.ros.org/ROS/Tutorials
-
-# Pushing/Pulling Docker Images from Dockerhub
-We like docker images to be stored on Dockerhub such that we can share them across developers and so our CI/CD pipeline can pull from there rather than building the image from scratch. There is a shell script in this repo which can be run to do the following:
-*  Build Docker image locally
-*  Push Docker image to DockerHub
-
-To run this script, simply run:
-```bash
-source <path-to-autonomous-repo>/docker/build_deploy_dev_docker.sh
-```
-If you are NOT logged into Docker already, it will prompt you for username and password for DockerHub. After entering, it will proceed to build and deploy the Docker image.
-
-To pull the latest docker image to work with, use:
-```bash
-docker pull ktopolovec/autonomous:latest
-```
-Alternatively, you can choose to simply build the docker image yourself from this repository by using:
-```
-docker build --file <path-to-autonomous-repo>/docker/Dockerfile-dev --tag "ktopolovec/autonomous" <path-to-autonomous-repo>/docker
-```
-Unclear which of the two options will be faster; one requires large Docker image to transfer over the network; the other requires user's PC to build the image which requires large installs to occur.
-
