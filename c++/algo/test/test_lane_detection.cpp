@@ -16,12 +16,6 @@
 
 int main()
 {
-    if (__cplusplus == 201703L) std::cout << "C++17\n";
-    else if (__cplusplus == 201402L) std::cout << "C++14\n";
-    else if (__cplusplus == 201103L) std::cout << "C++11\n";
-    else if (__cplusplus == 199711L) std::cout << "C++98\n";
-    else std::cout << "pre-standard C++\n";
-
     std::filesystem::path repoPath = std::filesystem::path(std::getenv("AUTONOMOUS_PATH"));
     std::filesystem::path inputImagePath = repoPath / "data/kitti_data_road/testing/image_2/um_000000.png";
     std::filesystem::path inputCalibPath = repoPath / "data/kitti_data_road/testing/calib/um_000000.txt";
@@ -43,5 +37,8 @@ int main()
         calibInfo.cameraToRoadTransform
     );
     const algo::LaneDetectorOutput output = LaneDetectorAlgo.run(img);
-    // LaneDetectorAlgo.printHello();
+    std::cout << "Left angle found? " << output.isLeftFound << std::endl;
+    std::cout << "Left angle: " << output.leftLaneAngle << std::endl;
+    std::cout << "Right angle found? " << output.isRightFound << std::endl;
+    std::cout << "Right angle: " << output.rightLaneAngle << std::endl;
 }

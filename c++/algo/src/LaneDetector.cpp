@@ -60,101 +60,130 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(cv::Mat image) const
         10.0);  // largest allowable pixel gap between consecutive points on line
 
     std::cout << "Lines found: " << std::endl;
-    for(auto line : outputLines) 
-        std::cout << "\t Line: " << line << std::endl;
-    // # Store points belonging to each line as (n_point, xy) = (2, 2) matrix:
-    // # left_points[0, :] = (x1, y1)
-    // # left_points[1, :] = (x2, y2)
-    // left_points = None
-    // right_points = None
-    // n_line = lines.shape[0]
-    // n_row, n_col, _ = image.shape
-    // for i_line in range(n_line):
-    //     # Lines ordered by confidence level
-    //     x1, y1, x2, y2 = lines[i_line, 0, :]
-    //     slope = (y2 - y1) / (x2 - x1)
-    //     intercept = y2 - slope * x2
-    //     line_side = check_lane_side(
-    //         slope=slope, intercept=intercept, n_row=n_row, n_col=n_col
-    //     )
+    Eigen::Vector2f leftStartPoint, leftEndPoint, rightStartPoint, rightEndPoint;
+    size_t x1, y1, x2, y2;
+    double slope, intercept;
+    
+    output.isLeftFound = false;
+    output.isRightFound = false;
 
-    //     # If this line is on left and left lane not yet found...
-    //     if (line_side == "left") and (left_points is None):
-    //         left_points = np.stack((np.array([x1, y1]), np.array([x2, y2])), axis=0)
+    for(auto line : outputLines)
+    {
+        x1 = line.val[0];
+        y1 = line.val[1];
+        x2 = line.val[2];
+        y2 = line.val[3];
 
-    //     # If this line is on right and right lane not yet found...
-    //     elif (line_side == "right") and (right_points is None):
-    //         right_points = np.stack(
-    //             (np.array([x1, y1]), np.array([x2, y2])), axis=0
-    //         )
+        slope = (y2 - y1) / (x2 - x1);
+        intercept = y2 - (x2 * slope);
+        const algo::LaneSide side = algo::checkLaneSide(
+            slope,
+            intercept,
+            singleChannel.rows,  // number rows in image
+            singleChannel.cols  // # columns in image
+        );
+        if (side == algo::LaneSide::LEFT){
+            output.isLeftFound = true;
+            leftStartPoint << x1, y1;
+            leftEndPoint << x2, y2;
+        }
+        else if(side == algo::LaneSide::RIGHT){
+            output.isRightFound = true;
+            rightStartPoint << x1, y1;
+            rightEndPoint << x2, y2;
+        }
 
-    //     # If both left/right lanes are found, stop looking
-    //     if (left_points is not None) and (right_points is not None):
-    //         break
+        // No need to keep looping once both lanes found
+        if (output.isRightFound && output.isLeftFound)
+        {
+            break;
+        }
+    }
 
-    // # === Project to real world ===
-    // # Left line: sample two points on line, rotate into road coordiante frame (centered at camera)
-    // # where x/y in road and +z out of road. Drop z coordinate and fit road-frame line
-    // cam_to_road = self.tr_cam_to_road[:3, :3]  # (3, 3) rotation matrix
-    // tvec_cam_to_road = self.tr_cam_to_road[
-    //     :3, 3
-    // ]  # (3,) translation vector = -cam_to_road * p_road_in_cam_frame
+    Eigen::Matrix3f camToRoad = this->cameraToRoadTransform.block(0, 0, 3, 3);
+    Eigen::Vector3f tvecCamToRoad = this->cameraToRoadTransform.block(0, 3, 3, 1);
 
-    // # Compute camera height off ground.
-    // # See http://www.cvlibs.net/datasets/kitti/setup.php for coordinate frames:
-    // # Camera frame: +z: forward, +x: right, +y: down (toward ground)
-    // p_roadorigin_cam = -np.linalg.solve(
-    //     cam_to_road, tvec_cam_to_road
-    // )  # road coord frame origin in camera frame
-    // camera_height = p_roadorigin_cam[1]  # y-value
+    // Origin of the road camera frame represented in camera coordinates
+    Eigen::Vector3f pRoadOriginCam = camToRoad.colPivHouseholderQr().solve(tvecCamToRoad);
+    const double cameraHeight = pRoadOriginCam(1);
 
     // # Define bird's eye frame. Note: This is similar to the "Road" coordinate frame, but chosen such
     // # that the +z axis points directly downward instead of +y
-    // ux_road_cam = cam_to_road[
-    //     0, :
-    // ]  # get the road frame basis vectors in the camera frame
-    // uy_road_cam = cam_to_road[1, :]
-    // uz_road_cam = cam_to_road[2, :]
-    // cam_to_bev = np.stack((uz_road_cam, ux_road_cam, uy_road_cam), axis=0)
+    cv::Mat camToBev = (cv::Mat_<double>(3, 3) << 
+        camToRoad(2, 0), camToRoad(2, 1), camToRoad(2, 2),
+        camToRoad(0, 0), camToRoad(0, 1), camToRoad(0, 2),
+        camToRoad(1, 0), camToRoad(1, 1), camToRoad(1, 2));
+
+    // Recover all points; store in vector to avoid redundant code:
+    std::vector<Eigen::Vector2f> imagePoints {
+        leftStartPoint,
+        leftEndPoint,
+        rightStartPoint,
+        rightEndPoint
+    };
 
     // # Rotate to equivalent bird's eye frame (still centered at camera)
-    // p_bevs = []  # list for each left/right lane, each have 2 points with xyz coords
-    // for ii, cam_pix in enumerate([left_points, right_points]):
-    //     bev_pix = cvision.apply_perspective_transform(
-    //         v=cam_pix, transform=cam_to_bev
-    //     )
+    std::cout << "camToBev: " << camToBev << std::endl;
+    Eigen::VectorXf augmented4d(4);  // augment 2d vecs to 4d; last element is inverse depth
 
-    //     # Augment pixel to 4D so we can recover point with inverse depth
-    //     depth = camera_height
-    //     bev_pix_aug = cvision.augment(bev_pix)
-    //     bev_pix_aug_4d = cvision.augment(bev_pix_aug)
-    //     bev_pix_aug_4d[..., -1] /= depth
+    // Construct 4D identity, insert camera matrix block, then invert
+    Eigen::MatrixXf cameraMatrix4dInv(4, 4);
+    cameraMatrix4dInv.block(0, 0, 4, 4) = Eigen::MatrixXf::Identity(4, 4);  // default identity
+    cameraMatrix4dInv.block(0, 0, 3, 3) = this->cameraMatrix;
+    std::cout << "cameraMatrix4dInv - pre-inversion:\n" << cameraMatrix4dInv << std::endl;
+    cameraMatrix4dInv = cameraMatrix4dInv.inverse();
+    std::cout << "cameraMatrix4dInv - post-inversion:\n" << cameraMatrix4dInv << std::endl;
 
-    //     # Invert perspective transform
-    //     camera_matrix_4d = np.eye(4)
-    //     camera_matrix_4d[:3, :3] = self.camera_matrix[
-    //         :3, :3
-    //     ]  # see kitti documentation; this is cam matrix
-    //     camera_matrix_inv = np.linalg.inv(camera_matrix_4d)
-    //     p_bev_homo = np.einsum(
-    //         "ij, ...j -> ...i", camera_matrix_inv, bev_pix_aug_4d
-    //     )
-    //     p_bev = cvision.homo_to_cart(p_bev_homo)
-    //     p_bevs.append(p_bev)
+    // Should be four points to loop through
+    std::vector<Eigen::VectorXf> pBevs;
+    for (auto & imagePoint : imagePoints) {
+        augmented4d << imagePoint(0), imagePoint(1), 1.0, (1.0 / cameraHeight);
+        std::cout << "augmented4d:\n" << augmented4d << std::endl;
 
-    // # Forget about +z coord which is height off ground; care only about angle of x/y coords
-    // p_bev_left, p_bev_right = p_bevs
-    // v_left_lane = (
-    //     p_bev_left[1, :] - p_bev_left[0, :]
-    // )  # left lane vector from point (x1, y1, z1) to (x2, y2, z2)
-    // v_right_lane = p_bev_right[1, :] - p_bev_right[0, :]
+        Eigen::VectorXf pBevHomo(4);
+        pBevHomo << cameraMatrix4dInv * augmented4d;
+        std::cout << "pBevHomo:\n" << pBevHomo << std::endl;
+        Eigen::VectorXf pBev(3);
+        pBev << pBevHomo.block(0, 0, 3, 1) / pBevHomo(3);  // normalize by last elm
+        std::cout << "pBev: " << pBev << std::endl;
+        pBevs.push_back(pBev);
+    }
 
-    // left_lane_angle = np.arctan2(v_left_lane[1], v_left_lane[0])
-    // right_lane_angle = np.arctan2(v_right_lane[1], v_right_lane[0])
+    // Form vector(s) starting from left/right startPoint to left/right Endpoint; then find
+    // angle of vector
+    Eigen::VectorXf vLeft(3);
+    vLeft << pBevs.at(1) - pBevs.at(0);
 
-    // out = {"left_lane_angle": left_lane_angle, "right_lane_angle": right_lane_angle}
+    Eigen::VectorXf vRight(3);
+    vRight << pBevs.at(3) - pBevs.at(2);
 
-    output.leftLaneAngle = 30.0;
-    output.rightLaneAngle = 20.0;
+    // Only consider x/y in angle computation. Z should be constant value since it's recovered
+    // directly from the depth value
+    output.leftLaneAngle = atan2(vLeft(1), vLeft(0));
+    output.rightLaneAngle = atan2(vRight(1), vRight(0));
+
+    std::cout << "Left angle: " << output.leftLaneAngle << std::endl;
+    std::cout << "Right angle: " << output.rightLaneAngle << std::endl;
+
     return output;
+}
+
+const algo::LaneSide algo::checkLaneSide(
+    const double slope,
+    const double intercept,
+    const size_t nRow,
+    const size_t nCol
+)
+{
+    // Check x-coordinate (column) where line intersects at bottom of image
+    LaneSide side;
+    if (((nRow - intercept) / slope) < ((nCol - 1) / 2))
+    {
+        side = LaneSide::LEFT;
+    }
+    else
+    {
+        side = LaneSide::RIGHT;
+    }
+    return side;
 }

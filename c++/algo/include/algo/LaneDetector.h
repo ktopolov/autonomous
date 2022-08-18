@@ -14,6 +14,8 @@ namespace algo
 {
     struct LaneDetectorOutput
     {
+        bool isLeftFound;  // whether left lane line found; Only use leftLaneAngle if this is true
+        bool isRightFound;  //whether right lane line found; Only use rightLaneAngle if this is true
         float leftLaneAngle;  // Angle (degrees) of left lane line in road coordinate frame
         float rightLaneAngle;  // Angle (degrees) of right lane line in road coordinate frame
     };
@@ -41,5 +43,27 @@ namespace algo
             Eigen::MatrixXf cameraMatrix;  // (3, 3) camera projection matrix w/ focal lengths, principal point, etc.
             Eigen::MatrixXf cameraToRoadTransform;  // [R | t] (3, 4) extrinsic transformation from camera to road coords
     };
+
+    // Enum describing possible lane line sides
+    enum LaneSide{
+        LEFT,
+        RIGHT,
+        UNKNOWN,
+    };
+
+    /*! Check which side of road lane line is on
+        \param slope Line slope (y2 - y1) / (x2 - x1) in image
+        \param intercept Line y-intercept in image
+        \param nRow Number of rows in image (height) in pixels
+        \param nCol Number of cols in image (width) in pixels
+        \return side Side of road  
+    */
+    const LaneSide checkLaneSide(
+        const double slope,
+        const double intercept,
+        const size_t nRow,
+        const size_t nCol
+    );
+
 };
 #endif // ALGO_INCLUDE_ALGO_LANEDETECTOR_H

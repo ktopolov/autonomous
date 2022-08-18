@@ -97,8 +97,6 @@ class LaneLineDetector:
         )
 
         # Store points belonging to each line as (n_point, xy) = (2, 2) matrix:
-        # left_points[0, :] = (x1, y1)
-        # left_points[1, :] = (x2, y2)
         left_points = None
         right_points = None
         n_line = lines.shape[0]
@@ -246,8 +244,8 @@ class LaneLineDetector:
             # Plot real-world left/right lane line points
             plt.subplot(3, 3, 9)
             labels = [
-                f"left - {left_lane_angle:.2f} deg",
-                f"right - {right_lane_angle:.2f} deg",
+                f"left - {left_lane_angle:.2f} rad",
+                f"right - {right_lane_angle:.2f} rad",
             ]
             styles = ["r-x", "b-x"]
             for ii, p_bev in enumerate(p_bevs):  # go through right and left side

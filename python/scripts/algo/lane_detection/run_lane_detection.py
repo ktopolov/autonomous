@@ -18,7 +18,6 @@ import cv2
 from modules.algo import lane_detection
 from modules.data import kitti
 
-
 def parse_cli_args() -> argparse.Namespace:
     """Parse command line arguments
 
@@ -75,7 +74,6 @@ if __name__ == "__main__":
         image=image,
         fig_num=1,
     )
-    print("=== OUTPUTS ===")
     for key, value in out.items():
         print(f"{key}: {value}")
 

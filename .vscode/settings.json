@@ -85,7 +85,8 @@
         "openglsupport": "cpp",
         "specialfunctions": "cpp",
         "splines": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "*.expression": "cpp"
     },
     "editor.rulers": [
         100
@@ -100,5 +101,6 @@
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}/python"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/c++"
+    "terminal.integrated.allowChords": false,
+    "terminal.integrated.drawBoldTextInBrightColors": false,
 }
