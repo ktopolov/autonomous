@@ -14,7 +14,7 @@ find_package( OpenCV REQUIRED )
 # Includes folders
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories(${PROJECT_SOURCE_DIR}/external/eigen-3.4.0)
-include_directories(${PROJECT_SOURCE_DIR}/external/spdlib)
+include_directories(${PROJECT_SOURCE_DIR}/external/spdlog)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Link Headers to their Implementations
