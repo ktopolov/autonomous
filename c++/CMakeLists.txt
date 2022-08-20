@@ -1,17 +1,14 @@
 # Specify CMAKE version 
 cmake_minimum_required(VERSION 3.16.3)
+set(CMAKE_CXX_STANDARD 17)
 
 # Give the project a name. CMake will automativally store this name as the variable PROJECT_NAME
 project(autonomous)
 
 # Ensure dependencies exist
-find_package( OpenCV REQUIRED )
+find_package(OpenCV REQUIRED)
 
-# Add subfolder(s) to build folder
-# add_subdirectory(src/apps)
-
-# Note that $PROJECT_SOURCE_DIR refers to the ./c++ folder
-# Includes folders
+# Include external directories
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories(${PROJECT_SOURCE_DIR}/external/eigen-3.4.0)
 include_directories(${PROJECT_SOURCE_DIR}/external/spdlog)
@@ -26,3 +23,6 @@ add_executable(helloworld ${PROJECT_SOURCE_DIR}/src/apps/helloworld.cpp)
 # Link Applications to their Required Libraries
 target_link_libraries(helloworld helper ${OpenCV_LIBS})
 
+# Add all internal subdirectories for cmake to go through
+add_subdirectory(common)
+add_subdirectory(algo)

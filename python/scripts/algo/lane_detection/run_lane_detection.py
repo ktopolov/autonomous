@@ -13,13 +13,10 @@ import argparse
 # Third Party Imports
 import matplotlib.pyplot as plt
 import cv2
-import numpy as np
 
 # Local Imports
 from modules.algo import lane_detection
 from modules.data import kitti
-from modules.common import computer_vision as cvision
-
 
 def parse_cli_args() -> argparse.Namespace:
     """Parse command line arguments
@@ -77,7 +74,6 @@ if __name__ == "__main__":
         image=image,
         fig_num=1,
     )
-    print("=== OUTPUTS ===")
     for key, value in out.items():
         print(f"{key}: {value}")
 
