@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.16.3)
 set(CMAKE_CXX_STANDARD 17)
 
+# Needed for spdlog for some reason...
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 # Give the project a name. CMake will automativally store this name as the variable PROJECT_NAME
 project(autonomous)
 
@@ -12,16 +15,6 @@ find_package(OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories(${PROJECT_SOURCE_DIR}/external/eigen-3.4.0)
 include_directories(${PROJECT_SOURCE_DIR}/external/spdlog)
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-# Link Headers to their Implementations
-add_library(helper ${PROJECT_SOURCE_DIR}/include/helper.h ${PROJECT_SOURCE_DIR}/src/modules/helper.cpp)
-
-# Applications
-add_executable(helloworld ${PROJECT_SOURCE_DIR}/src/apps/helloworld.cpp)
-
-# Link Applications to their Required Libraries
-target_link_libraries(helloworld helper ${OpenCV_LIBS})
 
 # Add all internal subdirectories for cmake to go through
 add_subdirectory(common)

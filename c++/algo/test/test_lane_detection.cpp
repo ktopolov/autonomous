@@ -6,7 +6,8 @@
 
 // Third-Party Imports
 #include "opencv2/opencv.hpp"
-#include <Eigen/Dense>
+#include "spdlog/spdlog.h"
+#include "Eigen/Dense"
 #include "Eigen/Core"
 
 // Local Imports
@@ -16,6 +17,19 @@
 
 int main()
 {
+    // Console logger with color
+    auto console = spdlog::stdout_color_st("console");
+    console->set_pattern("%n: [%H:%M:%S %z] [thread %t] %v");
+    console->info("Welcome to spdlog!");
+    console->error("Some error message with arg{}..", 1);
+    
+    // Formatting examples
+    console->warn("Easy padding in numbers like {:08d}", 12);
+    console->critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
+    console->info("Support for floats {:03.2f}", 1.23456);
+    console->info("Positional args are {1} {0}..", "too", "supported");
+    console->info("{:<30}", "left aligned");
+
     std::filesystem::path repoPath = std::filesystem::path(std::getenv("AUTONOMOUS_PATH"));
     std::filesystem::path inputImagePath = repoPath / "data/kitti_data_road/testing/image_2/um_000000.png";
     std::filesystem::path inputCalibPath = repoPath / "data/kitti_data_road/testing/calib/um_000000.txt";
