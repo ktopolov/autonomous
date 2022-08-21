@@ -9,6 +9,8 @@ To use this:
 import pathlib
 import json
 import argparse
+import logging
+import sys
 
 # Third Party Imports
 import matplotlib.pyplot as plt
@@ -48,6 +50,14 @@ def parse_cli_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
+    # Setup a logger
+    logger = logging.getLogger("MyLogger")
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(name)s: [%(asctime)s] (%(levelname)s) [thread %(thread)d] %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
     args = parse_cli_args()
 
     image = cv2.imread(args.image_path)
@@ -73,6 +83,7 @@ if __name__ == "__main__":
     out = LaneDetector.run(
         image=image,
         fig_num=1,
+        logger=logger,
     )
     for key, value in out.items():
         print(f"{key}: {value}")

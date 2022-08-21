@@ -7,8 +7,9 @@ Encapsulation and functions relating to lane line detection algorithm
 // Standard Imports
 
 // Third-Party Imports
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 #include "opencv2/opencv.hpp"
+#include "spdlog/spdlog.h"
 
 namespace algo
 {
@@ -34,9 +35,16 @@ namespace algo
 
             /*! Run algorithm on an incoming image
                 \param image (nRow, nCol, 3) RGB image.
+                \param logger Logger for stdout or file logging
+                \param isDebugPlot enables debug plots to appear; will halt code execution at algo
+                    completion until user key press
                 \return output Output lane angles.  
             */
-            const LaneDetectorOutput run(cv::Mat image) const;
+            const LaneDetectorOutput run(
+                cv::Mat image,
+                std::shared_ptr<spdlog::logger> logger,
+                const bool isDebugPlot
+            ) const;
 
         // Member functions
         private:

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 set(CMAKE_CXX_STANDARD 17)
 
-# Needed for spdlog for some reason...
+# Needed for spdlog for some reason... otherwise you will get segmentation faults for no good reason
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 # Give the project a name. CMake will automativally store this name as the variable PROJECT_NAME
