@@ -15,6 +15,7 @@ import sys
 # Third Party Imports
 import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 
 # Local Imports
 from modules.algo import lane_detection
@@ -52,7 +53,7 @@ def parse_cli_args() -> argparse.Namespace:
 if __name__ == "__main__":
     # Setup a logger
     logger = logging.getLogger("MyLogger")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)  # logging.DEBUG
     handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('%(name)s: [%(asctime)s] (%(levelname)s) [thread %(thread)d] %(message)s')
     handler.setFormatter(formatter)
@@ -85,8 +86,11 @@ if __name__ == "__main__":
         fig_num=1,
         logger=logger,
     )
-    for key, value in out.items():
-        print(f"{key}: {value}")
+    # for key, value in out.items():
+    #     print(f"{key}: {value}")
+
+    logger.info("Left lane angle: %f degrees", np.rad2deg(out['left_lane_angle']))
+    logger.info("Right lane angle: %f degrees", np.rad2deg(out['right_lane_angle']))
 
     if args.show_plots:
         plt.show()

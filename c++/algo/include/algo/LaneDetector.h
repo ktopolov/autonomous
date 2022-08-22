@@ -17,8 +17,8 @@ namespace algo
     {
         bool isLeftFound;  // whether left lane line found; Only use leftLaneAngle if this is true
         bool isRightFound;  //whether right lane line found; Only use rightLaneAngle if this is true
-        float leftLaneAngle;  // Angle (degrees) of left lane line in road coordinate frame
-        float rightLaneAngle;  // Angle (degrees) of right lane line in road coordinate frame
+        float leftLaneAngle;  // Angle (degrees) of left lane line in road coordinate frame; 0 to pi radians
+        float rightLaneAngle;  // Angle (degrees) of right lane line in road coordinate frame; 0 to pi radians
     };
 
     class LaneDetector {
@@ -36,8 +36,8 @@ namespace algo
             /*! Run algorithm on an incoming image
                 \param image (nRow, nCol, 3) RGB image.
                 \param logger Logger for stdout or file logging
-                \param isDebugPlot enables debug plots to appear; will halt code execution at algo
-                    completion until user key press
+                \param isDebugPlot enables debug plots to appear; will NOT halt execution to show
+                    plots. User must call cv::waitKey(0); externally to do this
                 \return output Output lane angles.  
             */
             const LaneDetectorOutput run(
@@ -72,6 +72,5 @@ namespace algo
         const size_t nRow,
         const size_t nCol
     );
-
 };
 #endif // ALGO_INCLUDE_ALGO_LANEDETECTOR_H

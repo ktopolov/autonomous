@@ -20,7 +20,7 @@ int main()
 {
     // Console logger with color
     std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_st("MyLogger");
-    logger->set_level(spdlog::level::debug);
+    logger->set_level(spdlog::level::info);  // spdlog::level::debug
     logger->set_pattern("%n: [%H:%M:%S] (%l) [thread %t] %v");  // info, error, warn, critical are functions
 
     std::filesystem::path repoPath = std::filesystem::path(std::getenv("AUTONOMOUS_PATH"));
@@ -47,4 +47,7 @@ int main()
         logger,
         true  // show debug plots
     );
+    logger->info("Left angle: {} degrees", output.leftLaneAngle * (180.0 / M_PI));
+    logger->info("Right angle: {} degrees", output.rightLaneAngle * (180.0 / M_PI));
+    cv::waitKey(0);
 }

@@ -101,12 +101,12 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(
             edgesInRoi.rows,  // number rows in image
             edgesInRoi.cols  // # columns in image
         );
-        if (side == algo::LaneSide::LEFT){
+        if ((side == algo::LaneSide::LEFT) && !output.isLeftFound) {
             output.isLeftFound = true;
             leftStartPoint << x1, y1;
             leftEndPoint << x2, y2;
         }
-        else if(side == algo::LaneSide::RIGHT){
+        else if ((side == algo::LaneSide::RIGHT) && !output.isRightFound) {
             output.isRightFound = true;
             rightStartPoint << x1, y1;
             rightEndPoint << x2, y2;
@@ -143,6 +143,10 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(
         rightStartPoint,
         rightEndPoint
     };
+    logger->debug("Left Start: {}", leftStartPoint);
+    logger->debug("Left End: {}", leftEndPoint);
+    logger->debug("Right Start: {}", rightStartPoint);
+    logger->debug("Right End: {}", rightEndPoint);
 
     // Rotate to equivalent bird's eye frame (still centered at camera)
     Eigen::VectorXf augmented4d(4);  // augment 2d vecs to 4d; last element is inverse depth
@@ -159,12 +163,22 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(
     std::vector<Eigen::VectorXf> pBevs;
     logger->info("Recovering points in 3D...");
     for (auto & imagePoint : imagePoints) {
-        augmented4d << imagePoint(0), imagePoint(1), 1.0, (1.0 / cameraHeight);
+        // Rotate to bird's eye frame; annoyingly forced to provide a vector of points
+        std::vector<cv::Point2f> imagePointVec{cv::Point2f(imagePoint(0), imagePoint(1))};
+        std::vector<cv::Point2f> bevPixels;
+        cv::perspectiveTransform(imagePointVec, bevPixels, camToBev);
+
+        // Augment point and recover by assuming depth
+        augmented4d << bevPixels.at(0).x, bevPixels.at(0).y, 1.0, (1.0 / cameraHeight);
         Eigen::VectorXf pBevHomo(4);
         pBevHomo << cameraMatrix4dInv * augmented4d;
         Eigen::VectorXf pBev(3);
         pBev << pBevHomo.block(0, 0, 3, 1) / pBevHomo(3);  // normalize by last elm
         pBevs.push_back(pBev);
+
+        logger->debug("augmented4d: {}", augmented4d);
+        logger->debug("pBevHomo: {}", pBevHomo);
+        logger->debug("pBev: {}", pBev);
     }
 
     // Form vector(s) starting from left/right startPoint to left/right Endpoint; then find
@@ -182,6 +196,9 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(
     // directly from the depth value
     output.leftLaneAngle = atan2(vLeft(1), vLeft(0));
     output.rightLaneAngle = atan2(vRight(1), vRight(0));
+
+    if (output.leftLaneAngle < 0.0) output.leftLaneAngle += M_PI;
+    if (output.rightLaneAngle < 0.0) output.rightLaneAngle += M_PI;
 
     logger->debug("Left angle: {} radians", output.leftLaneAngle);
     logger->debug("Right angle: {} radians", output.rightLaneAngle);
@@ -210,7 +227,6 @@ const algo::LaneDetectorOutput algo::LaneDetector::run(
         out << "Image w/ Lane Lines\nLeft/Right found? " << output.isLeftFound 
             << "/" << output.isRightFound;
         cv::imshow(out.str(), tempImage);
-        cv::waitKey(0);
     }
 
     return output;

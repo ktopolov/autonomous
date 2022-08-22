@@ -59,8 +59,8 @@ class LaneLineDetector:
 
         Returns:
             out: Contains output parameters
-                'left_lane_angle': Angle of left lane w.r.t. road coordinates (rad)
-                'right_lane_angle': Angle of right lane w.r.t. road coordinates (rad)
+                'left_lane_angle': Angle of left lane w.r.t. road coordinates (rad); 0 to pi radians
+                'right_lane_angle': Angle of right lane w.r.t. road coordinates (rad); 0 to pi rad
         """
         if logger is None:
             logger = logging.getLogger()
@@ -170,6 +170,11 @@ class LaneLineDetector:
         logger.debug("4D Camera Matrix - Inverted:\n%r", camera_matrix_inv)
 
         logger.info("Recovering points in 3D...")
+
+        logger.debug("Left Start: %r", left_points[0, :])
+        logger.debug("Left End: %r", left_points[1, :])
+        logger.debug("Right Start: %r", right_points[0, :])
+        logger.debug("Right End: %r", right_points[1, :])
         for ii, cam_pix in enumerate([left_points, right_points]):
             bev_pix = cvision.apply_perspective_transform(
                 v=cam_pix, transform=cam_to_bev
@@ -186,6 +191,10 @@ class LaneLineDetector:
             p_bev = cvision.homo_to_cart(p_bev_homo)
             p_bevs.append(p_bev)
 
+            logger.debug("augmented4d: %r", bev_pix_aug_4d)
+            logger.debug("pBevHomo: %r", p_bev_homo)
+            logger.debug("pBev: %r", p_bev)
+
         # Forget about +z coord which is height off ground; care only about angle of x/y coords
         p_bev_left, p_bev_right = p_bevs
         v_left_lane = (
@@ -198,6 +207,12 @@ class LaneLineDetector:
 
         left_lane_angle = np.arctan2(v_left_lane[1], v_left_lane[0])
         right_lane_angle = np.arctan2(v_right_lane[1], v_right_lane[0])
+
+        # Ensure angles are in quadrant 1 or 2 (0 to pi radians)
+        if left_lane_angle < 0.0:
+            left_lane_angle += np.pi
+        if right_lane_angle < 0.0:
+            right_lane_angle += np.pi
 
         logger.debug("Left angle: %f radians", left_lane_angle)
         logger.debug("Right angle: %f radians", right_lane_angle)
@@ -265,8 +280,8 @@ class LaneLineDetector:
             # Plot real-world left/right lane line points
             plt.subplot(3, 3, 9)
             labels = [
-                f"left - {left_lane_angle:.2f} rad",
-                f"right - {right_lane_angle:.2f} rad",
+                f"left: {left_lane_angle:.2f} rad",
+                f"right: {right_lane_angle:.2f} rad",
             ]
             styles = ["r-x", "b-x"]
             for ii, p_bev in enumerate(p_bevs):  # go through right and left side
@@ -275,6 +290,7 @@ class LaneLineDetector:
             plt.title("Bird's Eye Frame (Cartesian; not image)")
             plt.grid()
             plt.legend()
+            plt.axis('equal')
 
             plt.tight_layout()
 
