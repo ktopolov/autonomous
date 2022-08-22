@@ -9,6 +9,8 @@ To use this:
 import pathlib
 import json
 import argparse
+import logging
+import sys
 
 # Third Party Imports
 import matplotlib.pyplot as plt
@@ -18,8 +20,6 @@ import numpy as np
 # Local Imports
 from modules.algo import lane_detection
 from modules.data import kitti
-from modules.common import computer_vision as cvision
-
 
 def parse_cli_args() -> argparse.Namespace:
     """Parse command line arguments
@@ -51,6 +51,14 @@ def parse_cli_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
+    # Setup a logger
+    logger = logging.getLogger("MyLogger")
+    logger.setLevel(logging.INFO)  # logging.DEBUG
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(name)s: [%(asctime)s] (%(levelname)s) [thread %(thread)d] %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
     args = parse_cli_args()
 
     image = cv2.imread(args.image_path)
@@ -76,10 +84,13 @@ if __name__ == "__main__":
     out = LaneDetector.run(
         image=image,
         fig_num=1,
+        logger=logger,
     )
-    print("=== OUTPUTS ===")
-    for key, value in out.items():
-        print(f"{key}: {value}")
+    # for key, value in out.items():
+    #     print(f"{key}: {value}")
+
+    logger.info("Left lane angle: %f degrees", np.rad2deg(out['left_lane_angle']))
+    logger.info("Right lane angle: %f degrees", np.rad2deg(out['right_lane_angle']))
 
     if args.show_plots:
         plt.show()

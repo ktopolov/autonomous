@@ -1,6 +1,7 @@
 """Support code for lane line detection"""
 # Standard Imports
 import typing
+import logging
 
 # Third Party Imports
 import numpy as np
@@ -47,18 +48,26 @@ class LaneLineDetector:
         self,
         image: np.ndarray,
         fig_num: typing.Union[int, str] = None,
+        logger: logging.Logger = None,
     ) -> dict:
         """Run algorithm for lane line detection
 
         Args:
             image : (n_row, n_col, 3) BGR image
             fig_num: Figure number / label for plotting, if desired
+            logger: Logger
 
         Returns:
             out: Contains output parameters
-                'left_lane_angle': Angle of left lane w.r.t. road coordinates (rad)
-                'right_lane_angle': Angle of right lane w.r.t. road coordinates (rad)
+                'left_lane_angle': Angle of left lane w.r.t. road coordinates (rad); 0 to pi radians
+                'right_lane_angle': Angle of right lane w.r.t. road coordinates (rad); 0 to pi rad
         """
+        if logger is None:
+            logger = logging.getLogger()
+            logger.addHandler(logging.NullHandler())
+
+        logger.info("Beggining lane line detection")
+
         # Convert to HSV and select only the value channel
         image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         image_value = image_hsv[:, :, 2]
@@ -79,12 +88,8 @@ class LaneLineDetector:
         roi_mask = np.zeros_like(image, shape=(n_row, n_col))
         cv2.fillPoly(roi_mask, np.array([self.config["roi_polygon"]]), 255)
 
-        # Threshold for white lines only
-        threshold = 200
-        threshold_mask = image_value > threshold
-
-        # Intersect edges with white threshold mask
-        image_edges_with_mask = image_edges * roi_mask  # * threshold_mask
+        # Intersect edges with ROI mask
+        image_edges_with_mask = image_edges * roi_mask
 
         # Detect lines in mask
         lines = cv2.HoughLinesP(
@@ -95,10 +100,9 @@ class LaneLineDetector:
             minLineLength=self.config["hough_min_line_length"],
             maxLineGap=self.config["hough_max_line_gap"],
         )
+        logger.debug(f"HoughLinesP found %d lines", len(lines))
 
         # Store points belonging to each line as (n_point, xy) = (2, 2) matrix:
-        # left_points[0, :] = (x1, y1)
-        # left_points[1, :] = (x2, y2)
         left_points = None
         right_points = None
         n_line = lines.shape[0]
@@ -125,6 +129,9 @@ class LaneLineDetector:
             # If both left/right lanes are found, stop looking
             if (left_points is not None) and (right_points is not None):
                 break
+
+        logger.debug("Left lane line found? %r", left_points is not None)
+        logger.debug("Right lane line found? %r", right_points is not None)
 
         # === Project to real world ===
         # Left line: sample two points on line, rotate into road coordiante frame (centered at camera)
@@ -153,6 +160,21 @@ class LaneLineDetector:
 
         # Rotate to equivalent bird's eye frame (still centered at camera)
         p_bevs = []  # list for each left/right lane, each have 2 points with xyz coords
+        # Invert perspective transform
+        camera_matrix_4d = np.eye(4)
+        camera_matrix_4d[:3, :3] = self.camera_matrix[
+            :3, :3
+        ]  # see kitti documentation; this is cam matrix
+        camera_matrix_inv = np.linalg.inv(camera_matrix_4d)
+        logger.debug("4D Camera Matrix:\n%r", camera_matrix_4d)
+        logger.debug("4D Camera Matrix - Inverted:\n%r", camera_matrix_inv)
+
+        logger.info("Recovering points in 3D...")
+
+        logger.debug("Left Start: %r", left_points[0, :])
+        logger.debug("Left End: %r", left_points[1, :])
+        logger.debug("Right Start: %r", right_points[0, :])
+        logger.debug("Right End: %r", right_points[1, :])
         for ii, cam_pix in enumerate([left_points, right_points]):
             bev_pix = cvision.apply_perspective_transform(
                 v=cam_pix, transform=cam_to_bev
@@ -163,18 +185,15 @@ class LaneLineDetector:
             bev_pix_aug = cvision.augment(bev_pix)
             bev_pix_aug_4d = cvision.augment(bev_pix_aug)
             bev_pix_aug_4d[..., -1] /= depth
-
-            # Invert perspective transform
-            camera_matrix_4d = np.eye(4)
-            camera_matrix_4d[:3, :3] = self.camera_matrix[
-                :3, :3
-            ]  # see kitti documentation; this is cam matrix
-            camera_matrix_inv = np.linalg.inv(camera_matrix_4d)
             p_bev_homo = np.einsum(
                 "ij, ...j -> ...i", camera_matrix_inv, bev_pix_aug_4d
             )
             p_bev = cvision.homo_to_cart(p_bev_homo)
             p_bevs.append(p_bev)
+
+            logger.debug("augmented4d: %r", bev_pix_aug_4d)
+            logger.debug("pBevHomo: %r", p_bev_homo)
+            logger.debug("pBev: %r", p_bev)
 
         # Forget about +z coord which is height off ground; care only about angle of x/y coords
         p_bev_left, p_bev_right = p_bevs
@@ -183,8 +202,20 @@ class LaneLineDetector:
         )  # left lane vector from point (x1, y1, z1) to (x2, y2, z2)
         v_right_lane = p_bev_right[1, :] - p_bev_right[0, :]
 
+        logger.debug("v_left_lane: (%f, %f, %f)", *v_left_lane)
+        logger.debug("v_right_lane: (%f, %f, %f)", *v_right_lane)
+
         left_lane_angle = np.arctan2(v_left_lane[1], v_left_lane[0])
         right_lane_angle = np.arctan2(v_right_lane[1], v_right_lane[0])
+
+        # Ensure angles are in quadrant 1 or 2 (0 to pi radians)
+        if left_lane_angle < 0.0:
+            left_lane_angle += np.pi
+        if right_lane_angle < 0.0:
+            right_lane_angle += np.pi
+
+        logger.debug("Left angle: %f radians", left_lane_angle)
+        logger.debug("Right angle: %f radians", right_lane_angle)
 
         out = {"left_lane_angle": left_lane_angle, "right_lane_angle": right_lane_angle}
 
@@ -194,7 +225,11 @@ class LaneLineDetector:
             is_right_found = right_points is not None
 
             image_infos = [
-                {"image": image, "title": "Original", "kwargs": {}},
+                {
+                    "image": image,
+                    "title": "Original",
+                    "kwargs": {}
+                },
                 {
                     "image": image_value,
                     "title": "HSV - Value",
@@ -210,15 +245,14 @@ class LaneLineDetector:
                     "title": "Canny Edges",
                     "kwargs": {"cmap": "gray"},
                 },
-                {"image": roi_mask, "title": "ROI Mask", "kwargs": {"cmap": "gray"}},
                 {
-                    "image": threshold_mask,
-                    "title": "Original",
-                    "kwargs": {"cmap": "gray"},
+                    "image": roi_mask,
+                    "title": "ROI Mask",
+                    "kwargs": {"cmap": "gray"}
                 },
                 {
                     "image": image_edges_with_mask,
-                    "title": "Edges w/ ROI & Threshold Mask",
+                    "title": "Edges w/ ROI Mask",
                     "kwargs": {"cmap": "gray"},
                 },
                 {
@@ -246,8 +280,8 @@ class LaneLineDetector:
             # Plot real-world left/right lane line points
             plt.subplot(3, 3, 9)
             labels = [
-                f"left - {left_lane_angle:.2f} deg",
-                f"right - {right_lane_angle:.2f} deg",
+                f"left: {left_lane_angle:.2f} rad",
+                f"right: {right_lane_angle:.2f} rad",
             ]
             styles = ["r-x", "b-x"]
             for ii, p_bev in enumerate(p_bevs):  # go through right and left side
@@ -256,6 +290,7 @@ class LaneLineDetector:
             plt.title("Bird's Eye Frame (Cartesian; not image)")
             plt.grid()
             plt.legend()
+            plt.axis('equal')
 
             plt.tight_layout()
 

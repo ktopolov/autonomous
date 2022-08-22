@@ -2,7 +2,8 @@
 FROM ubuntu:20.04
 RUN apt update
 
-# Copy whole repo to autonomous folder
+# Copy whole repo to autonomous folder; the "." refers to the "context" argument of docker build.
+# (the last argument). Should call "docker build ... dockerfile-dev <path-to-autonomous-repo>""
 COPY . /autonomous
 
 # Install and use bash terminal
@@ -39,10 +40,6 @@ RUN pip install -r /autonomous/python/requirements.txt
 
 # Can also pip install repo but then can't develop inside container
 ENV PYTHONPATH=/autonomous/python
-
-# Build C++ code
-RUN cmake -S /autonomous/c++ -B /autonomous/c++/build
-RUN cmake --build /autonomous/c++/build 
 
 # CMD defines what will be executed when you launch the container.
 # this is the main application
